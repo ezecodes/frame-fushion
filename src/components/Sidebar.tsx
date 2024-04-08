@@ -9,7 +9,7 @@ const links = [
     icon: <IoMdEye className="text-[1.5rem]" />
   },
   {
-    name: "Activity logs",
+    name: "Logs",
     href: "/app/logs",
     icon: <MdOutlineDataExploration className="text-[1.5rem]" />
   }

@@ -7,7 +7,7 @@ function AppHeader() {
   const [alert, setAlert] = useState<boolean>(false)
   
   return (
-    <header className="  w-full bg-[#32363b] sticky z-[11] top-0 h-[60px] flex items-center shadow-md px-5 py-[10px]">
+    <header className="  w-full bg-[#32363b] sticky z-[15] top-0 h-[60px] flex items-center shadow-md px-5 py-[10px]">
       <div className="wrapper justify-between flex">
         <div className="">
           

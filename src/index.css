@@ -95,18 +95,19 @@ h1 {
   border-radius: 5px;
 }
 .cam_res.active {
-  border: 5px solid #646cff;
+  outline: 2px solid #646cff;
 }
 .cam_res > div:first-child {
   position: absolute;
   top: 0;
   background-color: #474747b8;
   width: 100%;
-  display: flex;
-  flex-direction: column;
   backdrop-filter: blur(2px);
   padding: 5px 10px;
   color: #fff;
+}
+.cam_res > div:first-child {
+
 }
 .cam_res img {
   border-radius: 5px;
@@ -120,12 +121,11 @@ h1 {
 .alert_mgr .alert_li:last-of-type {
   border-bottom: none;
 }
-.alert_mgr .alert_li .alert_content > span:last-of-type {
+.nowrap_text {
   text-align: left;
   text-wrap: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  width: 70%;
 }
 
 .alert_ico {
