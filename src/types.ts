@@ -24,7 +24,14 @@ type Snapshot = {
     classified: SnapshotDescriptionClassification[],
     summary: string
   };
+}
 
+type ActivityLog = {
+  threatLevel: "critical" | "low";
+  id: string;
+  thumbnail: string;
+  title: string;
+  lastTimeCaptured: string | Date
 }
 
 type Camera = {
@@ -62,5 +69,6 @@ export type {
   Camera,
   DetectedImageResponseArray,
   DetectedImage,
-  AppAlert
+  AppAlert,
+  ActivityLog
 }
