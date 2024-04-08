@@ -77,60 +77,6 @@ function CameraResult({camera}: {camera: Camera}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
-  useEffect(() => {
-    async function detectObjects() {
-      try {
-        setDetecting(true)
-        const pathArray = new URL(camera.snapshots[camera.snapshots.length-1].path).pathname.split("/")
-        const detect = await fetch(`http://127.0.0.1:8787/api/secured/detect/${pathArray[pathArray.length -1]}`)
-        if (detect) {
-          const res: {response: DetectedImageResponseArray} = await detect.json()
-          setDetectedImage({
-            cameraId: camera.id,
-            response: res.response
-          })
-        }
-        return null
-      } catch (err) {
-
-      } finally {
-        setDetecting(false)
-      }
-      
-    }
-    // detectObjects()
-  }, [camera.snapshots])
-
-  // useEffect(() => {
-  //   
-  //   if (camera.control.recording) {
-  //     describeImage()
-  //   }
-  // }, [camera.control.recording])
-
-  // async function describeImage(path) {
-  //   try {
-  //     setDetecting(true)
-  //     const describe = await fetch(`http://127.0.0.1:8787/api/secured/describe/${pathArray[pathArray.length -1]}`)
-  //     if (describe) {
-  //       const res: {text: string; classified: [], summary: string} = await describe.json()
-  //       appendSnapshot({
-  //         text: res.text,
-  //         cameraId: camera.id,
-  //         classified: res.classified,
-  //         summary: res.summary
-  //       })
-  //       console.log(res)
-  //     }
-  //     return null
-  //   } catch (err) {
-
-  //   } finally {
-  //     setDetecting(false)
-  //   }
-    
-  // }
-
   const getSnapshot = () => {
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
@@ -142,7 +88,7 @@ function CameraResult({camera}: {camera: Camera}) {
     ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
     const imageDataURL = canvasElement.toDataURL('image/png');
     imgRef.current.src = imageDataURL
-    return imageDataURL
+    return {imageDataURL, playbackTime: videoElement.currentTime}
 
   };
   useEffect(() => {
@@ -169,10 +115,10 @@ function CameraResult({camera}: {camera: Camera}) {
 
     intervalRef.current = setInterval(() => {
       if (!camera.control.recording) return
-      const imageDataURL = getSnapshot()
+      const {imageDataURL, playbackTime} = getSnapshot()
       fetch('http://127.0.0.1:8787/api/secured/describe', {
         method: 'POST',
-        body: JSON.stringify({imageDataURL}),
+        body: JSON.stringify({imageDataURL, playbackTime}),
         headers: {
           'Content-Type': 'text/plain'
         }
@@ -270,7 +216,7 @@ function CameraResult({camera}: {camera: Camera}) {
       </div>
     </div>
     <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-    <img ref={imgRef} width="500px"  height="400px" />
+    {/* <img ref={imgRef} width="500px"  height="400px" /> */}
 
     </>
   )
