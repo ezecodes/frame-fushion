@@ -1,8 +1,9 @@
 import {create} from "zustand"
-import { Alert, Camera, DetectedImage, AppAlert } from "./types";
+import { Alert, Camera, DetectedImage, AppAlert, ActivityLog } from "./types";
 
 type Store = {
   alerts: Alert[] | null;
+  activityLogs: ActivityLog[] | null;
   cameraList: Camera[] | null;
   setAlert: (alert: Alert) => void;
   setSelectedCamera: (camera: Camera) => void;
@@ -21,6 +22,22 @@ const useStore = create<Store>((set, get) => ({
     set({appAlert: {type, message}})
   },
   alerts: null,
+  activityLogs: [
+    {
+      threatLevel: "low",
+      id: "log1",
+      thumbnail: "",
+      lastTimeCaptured: new Date(),
+      title: "2 Persons detected"
+    },
+    {
+      threatLevel: "critical",
+      id: "log2",
+      thumbnail: "",
+      lastTimeCaptured: new Date(),
+      title: "Gunmen found"
+    },
+  ],
   cameraList: [
     {
       id: "camId1",
