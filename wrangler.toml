@@ -1,12 +1,7 @@
-name = "SurveilAI"
+name = "surveil-ai"
 pages_build_output_dir = "./dist"
-
-[[kv_namespaces]]
-binding = "KV"
-id = "<NAMESPACE_ID>"
+compatibility_date = "2023-10-12"
+compatibility_flags = ["nodejs_compat"]
 
 [ai]
 binding = "AI"
-
-[vars]
-API_KEY = "1234567asdf"
