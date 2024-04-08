@@ -28,6 +28,7 @@ function Threats() {
     } 
     setSnapshotDescription({timeCaptured: new Date(timeCaptured), threat_level, summary: selectedCamera.snapshots?.at(-1).description.summary})
   }, [selectedCamera?.snapshots?.at(-1)])
+
   
   if (!snapshotDescription) return <></>
   return (
@@ -44,9 +45,13 @@ function Threats() {
               {snapshotDescription?.timeCaptured.toLocaleTimeString()} 
             </span>
           </div>
-          <div className="bg-raisinBlack">
+          <div className={snapshotDescription?.threat_level === "critical" ? "t_animate" : "bg-raisinBlack"}>
             <span> Threat level </span>
-            <span> {snapshotDescription?.threat_level} </span>
+            <span
+              
+            > 
+              {snapshotDescription?.threat_level} 
+            </span>
           </div>
           {/* <div className="bg-raisinBlack">
             <span> People present </span>
