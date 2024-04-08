@@ -66,16 +66,12 @@ function Surveillance() {
 function CameraResult({camera}: {camera: Camera}) {
   const setSelectedCamera = useStore(state => state.setSelectedCamera)
   const selectedCamera = useStore(state => state.selectedCamera)
-  const detected = useStore(state => state.detectedImages?.find(i => i.cameraId === camera.id))
-  const setDetectedImage = useStore(state => state.setDetectedImage)
   const appendSnapshot = useStore(state => state.appendSnapshot)
-  const [detecting, setDetecting] = useState(false)
   const intervalRef = useRef(null)
   const setCameraControl = useStore(state => state.setCameraControl)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const videoSrcRef = useRef<HTMLSourceElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const imgRef = useRef<HTMLImageElement | null>(null)
 
   const getSnapshot = () => {
     const videoElement = videoRef.current;
@@ -87,7 +83,6 @@ function CameraResult({camera}: {camera: Camera}) {
 
     ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
     const imageDataURL = canvasElement.toDataURL('image/png');
-    imgRef.current.src = imageDataURL
     return {imageDataURL, playbackTime: videoElement.currentTime}
 
   };
@@ -216,7 +211,6 @@ function CameraResult({camera}: {camera: Camera}) {
       </div>
     </div>
     <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-    {/* <img ref={imgRef} width="500px"  height="400px" /> */}
 
     </>
   )

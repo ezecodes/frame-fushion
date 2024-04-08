@@ -141,9 +141,9 @@ function Item({threatLevel, thumbnail, title, lastTimeCaptured}: ActivityLog) {
       </div>
       <div className="flex justify-center flex-col">
         <span className="font-[400] text-[.9rem] mb-1">{title}</span>
-        <span className="text-[] text-[.85rem] ">
+        <span className="text-[#e9e9e9] text-[.85rem] ">
           This event happened 
-          <span className="underline ml-2">{retrospectTime}, {dateFormat}</span>
+          <span className="underline ml-2 cursor-pointer">{retrospectTime}, {dateFormat}</span>
         </span>
       </div>
       <div>
