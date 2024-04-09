@@ -6,14 +6,19 @@ import {RouterProvider, createBrowserRouter} from "react-router-dom"
 import Dashboard from './pages/Dashboard.tsx'
 import Login from './pages/Login.tsx'
 import Signup from './pages/Signup.tsx'
-import Main from './pages/Main.tsx'
+import Landing from './pages/Landing.tsx'
 import Surveillance from './pages/Surveillance.tsx'
 import ActivityLogs from './pages/ActivityLogs.tsx'
+import Onboard from './pages/Onboard.tsx'
 
 const route = createBrowserRouter([
   {
     path: "/",
-    element: <Main />
+    element: <Landing />
+  },
+  {
+    path: "/onboard",
+    element: <Onboard />
   },
   {
     path: "/app",

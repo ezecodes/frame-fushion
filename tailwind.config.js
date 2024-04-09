@@ -6,7 +6,7 @@ export default {
     colors: {
       prussianBlue: "#1D3753",
       outerSpace: "#4A525A",
-      raisinBlack: "#24272B",
+      raisinBlack: "#1a2027",
       black: "#07070A",
     },
   },

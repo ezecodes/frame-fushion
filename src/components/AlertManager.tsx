@@ -9,6 +9,7 @@ function AlertManager() {
   return (
     <div className="absolute alert_mgr max-h-[350px] shadow-lg overflow-x-hidden overflow-y-scroll rounded-md right-0 top-[45px] bg-black w-[300px]">
       {
+        alerts &&
         alerts.map(alert => {
           return (
             <li key={alert.id} className=" alert_li flex gap-x-[15px] relative items-center border-bottom px-3 py-5 h-[80px]">
@@ -21,7 +22,7 @@ function AlertManager() {
                 </span>
                 <span className="absolute w-full left-[70px] alert_content flex flex-col items-start">
                   <span className="text-[white] text-[.95rem] font-[500] capitalize">{alert.type}</span>
-                  <span className="text-[.9rem] text-[#8b8b8b]"> {alert.message} </span>
+                  <span className="nowrap_text text-[.9rem] text-[#8b8b8b]"> {alert.message} </span>
                 </span>
             </li>
           )
