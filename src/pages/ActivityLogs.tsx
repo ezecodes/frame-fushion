@@ -7,6 +7,7 @@ import Searchbar from "../components/Searchbar"
 import { useEffect, useState } from "react";
 import { useStore } from "../store";
 import { ActivityLog } from "../types";
+import DashHeader from "../components/DashHeader";
 
 function LogManager({activityLogs, selectedLevels}: {
   activityLogs: ActivityLog[],
@@ -67,36 +68,44 @@ function ActivityLogs() {
     console.log(selectedLevels)
   }
   return (
-    <section className="px-[40px] py-[25px] poppins">
+    <section className="px-[40px]  poppins">
+      <DashHeader text={"activity logs"} />
       <div>
         <Searchbar />
       </div>
 
-      <div className="mt-[50px] mb-[30px]">
-        <button 
-          className={`log_level ${selecetedLevel === "low" ? "bg-[#575a5f]" : "bg-[#32363b]"} `} 
-          onClick={() => {handleLevel("low")}}
-        >
-          Low
-        </button>
-        <button 
-          className={`log_level ${selecetedLevel === "critical" ? "bg-[#575a5f]" : "bg-[#32363b]"} `} 
-          onClick={() => {handleLevel("critical")}}
-        >
-          Critical
-        </button>
-      </div>
-      <div className="my-[30px]">
-        {
-          !activityLogs ? 
-          "Activity Logs will show up here" :
-          <LogManager 
-            activityLogs={activityLogs}
-            selectedLevels={selectedLevels}
+      {
+        !activityLogs ?
+        <div className="subtext my-[60px]"><h2>Your activity logs will show here</h2></div>
+        : <div>
+          <div className="mt-[50px] mb-[30px]">
+            <button 
+              className={`log_level ${selecetedLevel === "low" ? "bg-[#575a5f]" : "bg-[#32363b]"} `} 
+              onClick={() => {handleLevel("low")}}
+            >
+              Low
+            </button>
+            <button 
+              className={`log_level ${selecetedLevel === "critical" ? "bg-[#575a5f]" : "bg-[#32363b]"} `} 
+              onClick={() => {handleLevel("critical")}}
+            >
+              Critical
+            </button>
+          </div>
+          <div className="my-[30px]">
+            {
+              !activityLogs ? 
+              "Activity Logs will show up here" :
+              <LogManager 
+                activityLogs={activityLogs}
+                selectedLevels={selectedLevels}
 
-          />
-        }
-      </div>
+              />
+            }
+          </div>
+        </div>
+      }
+
     </section>
 
   )
@@ -135,7 +144,7 @@ function Item({threatLevel, thumbnail, title, lastTimeCaptured}: ActivityLog) {
   }, [])
 
   return (
-    <div className="bg-[#303339] mb-2 flex justify-around items-center text-[white] rounded-sm gap-x-[10px] w-[550px] h-[75px]" style={{borderLeft: `5px solid ${labelColor} `}}>
+    <div className="bg-[#303339] animate__animated animate__fadeInUp mb-2 flex justify-around items-center text-[white] rounded-sm gap-x-[10px] w-[550px] h-[75px]" style={{borderLeft: `5px solid ${labelColor} `}}>
       <div className="">
         <img src={thumbnail} className="w-[inherit] h-[inherit]" />
       </div>

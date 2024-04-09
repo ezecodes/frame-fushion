@@ -4,9 +4,12 @@ import {useState, useEffect, useRef} from "react"
 import { FaCheck } from "react-icons/fa6";
 import { useStore } from "../store";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const screens = [
   {
-    question: "What is the purpose of using this tool?",
+    question: "What is your purpose of using this tool?",
     id: "q_1",
     path: "/undraw_goals_re_lu76.svg",
     options: [
@@ -46,16 +49,28 @@ function Onboard() {
       options: string[]
     } | null
   >(null)
-  const [curIndex, setIndex] = useState(0)
+  const [curIndex, setIndex] = useState(-1)
   const setOnboardChoice = useStore(state => state.setOnboardChoice)
+  const setAppAlert = useStore(state => state.setAppAlert)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (curIndex < screens.length) {
-    } 
-  }, [currentScreen])
+    console.log(curIndex)
+    setScreen(screens[curIndex])
+  }, [curIndex])
+
+  function updateIndex() {
+    curIndex < screens.length && setIndex(curIndex + 1)
+  }
+
+  function openApp() {
+    toast.info("You will now be redirected to the simulation environment", {
+      onClose: () => navigate("/simulation/app")
+    })
+  }
 
   return (
+    <>
     <section className="bg-raisinBlack poppins main animate__animated animate__fadeInLeft">
       <div className='auto_w'>
         <LandingHeader />
@@ -63,7 +78,7 @@ function Onboard() {
 
       <div className="mt-[100px] px-5 relative">
         {
-          currentScreen ?
+          curIndex !== -1 && currentScreen ?
           <div className="flex flex-col-reverse items-center md:flex-row gap-y-[50px] justify-center gap-x-[70px] animate__animated animate__fadeInUp">
             <div className="flex flex-col">
               <h3 className="text-[1.3rem] font-[400] mb-5"> {currentScreen.question} </h3>
@@ -80,17 +95,15 @@ function Onboard() {
                   )
                 }
               </div>
-              <div className="relative lg:fixed my-[20px] bottom-0 flex">
+              <div className="relative lg:fixed my-[20px] bottom-[-70px] flex">
                 <button className="choice_bt mr-5 bg-prussianBlue" onClick={() => {
-                  setScreen(screens[curIndex])
-                  setIndex(curIndex + 1)
-
                   if (curIndex === screens.length -1) {
-                    navigate("/app")
+                    openApp()
                   }
+                  updateIndex()
                  
                 }}> Continue </button>
-                <button className="choice_bt bg-[#333c47]"> Skip </button>
+                <button className="choice_bt bg-[#333c47]" onClick={openApp}> Skip </button>
               </div>
             </div>
             <div className="">
@@ -100,10 +113,10 @@ function Onboard() {
           : <div className='auto_w animate__animated animate__fadeInUp animate__delay-1s'>
             <h1 className='text-[1rem] w-full leading-6 md:w-[600px] text-center mx-[auto]'> <span className="block mb-5 font-[400] text-[2rem]">Welcome to German Guard!</span> <span className="text-[#ffca4c]">Ready to start?</span> Customize your experience now or jump right in. Your choice!</h1>
             <div className="flex gap-x-[15px] justify-center mt-[25px]">
-              <button className="choice_bt bg-prussianBlue" onClick={() => setScreen(screens[0])}> 
+              <button className="choice_bt bg-prussianBlue" onClick={updateIndex}> 
                 Let's begin 
               </button>
-              <button className="choice_bt bg-[#333c47]"><Link to="/app"> Maybe later </Link> </button>
+              <button className="choice_bt bg-[#333c47]" onClick={openApp}>Maybe later </button>
             </div>
           </div>
         }
@@ -111,7 +124,8 @@ function Onboard() {
 
         
     </section>
-    
+    <ToastContainer />
+    </>
   )
 }
 

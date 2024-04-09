@@ -5,10 +5,11 @@ import { BiSolidVideoRecording } from "react-icons/bi";
 import { TbLayoutList } from "react-icons/tb";
 import { BsColumnsGap } from "react-icons/bs";
 import Threats from "../components/Threats"
-import Loader from "../components/Loader";
 import { Audio, Puff } from "react-loader-spinner";
 import { AiOutlineAudio, AiOutlineAudioMuted } from "react-icons/ai";
 import Searchbar from "../components/Searchbar"
+import DashHeader from "../components/DashHeader";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 
 function ControlButton({control}: {control: {text?: string; icon?: any; click: () => void}}) {
   return (
@@ -20,30 +21,39 @@ function ControlButton({control}: {control: {text?: string; icon?: any; click: (
     </button>
   )
 }
+function CameraManager({ closeModal}) {
+  return (
+    <div className="fixed modal_overlay ">
+      <div className="modal px-4 py-4 animate__animated animate__zoomIn rounded-sm">
+        <div className="flex justify-between">
+          <h2>Add Camera</h2>
+          <IoMdCloseCircleOutline onClick={closeModal} className="text-[1.3rem] cursor-pointer" />
+        </div>
+      </div>
+    </div>
 
+  )
+}
 function Surveillance() {
   const cameraList = useStore(state => state.cameraList)
   const [layout, setLayout] = useState<"column" | "row">("row")
   const selectedCamera = useStore(state => state.selectedCamera)
+  const [showModal, setModal] = useState(false)
   
   return (
     <>
-    <div className="flex px-[40px] w-[68%] justify-between mx-[auto] py-5 poppins text-[white] ">
+    <div className="px-[40px] animate__animated animate__fadeIn flex-1 justify-between mx-[auto] poppins text-[white] ">
       <div className="">
-        <div className="flex gap-x-[10px] mb-[50px] mt-[10px]">
+      <DashHeader text={"surveillance"} />
+
+        <div className="flex gap-x-[10px] mb-[50px]">
           <Searchbar />
           <button className="text-[#8b8b8b] text-[1.5rem] flex gap-x-[10px]">
             <TbLayoutList onClick={() => setLayout("column")} className={`${layout === "column" ? "text-[white]" : ""}`} />
             <BsColumnsGap onClick={() => setLayout("row")} className={`${layout === "row" ? "text-[white]" : ""}`} />
           </button>
-          <div>
-
-          </div>
-          <div className="">
-
-          </div>
         </div>
-        <div className={`cam_res_wrap  ${layout === "column" ? "column" : "row"} `}>
+        <div className={`cam_res_wrap ${layout === "column" ? "column" : "row"} `}>
           { cameraList &&
             cameraList.map((camera, idx) => 
               <CameraResult 
@@ -53,11 +63,26 @@ function Surveillance() {
             )
           }
         </div>
+        <div>
+          {
+            !cameraList ?
+            <div className="subtext rounded-md flex justify-center mt-[50px] bg-[#161a1e] w-[400px] flex flex-col items-center mx-[auto] py-5">
+              <h2>Add a camera to show your video feed</h2>
+              <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
+            </div>
+            : <></>
+          }
+        </div>
       </div>
     </div>
     {
       selectedCamera && 
       <Threats />
+    }
+    {
+      showModal ? 
+      <CameraManager closeModal={() => setModal(false)} /> 
+      : <></> 
     }
     </>
   )
@@ -106,33 +131,38 @@ function CameraResult({camera}: {camera: Camera}) {
     }
   }, [camera.control.audio])
 
-  useEffect(() => {
-
-    intervalRef.current = setInterval(() => {
-      if (!camera.control.recording) return
-      const {imageDataURL, playbackTime} = getSnapshot()
-      fetch('http://127.0.0.1:8787/api/secured/describe', {
+  async function fetchDescription() {
+    const {imageDataURL, playbackTime} = getSnapshot()
+    try {
+      const des = await fetch('http://127.0.0.1:8787/api/secured/snapshot/describe', {
         method: 'POST',
         body: JSON.stringify({imageDataURL, playbackTime}),
         headers: {
           'Content-Type': 'text/plain'
         }
       })
-      .then(response => response.json())
-      .then((data: {text: string; classified: [], summary: string, timeCaptured: Date}) => {
-        appendSnapshot({
-          text: data.text,
-          cameraId: camera.id,
-          classified: data.classified,
-          summary: data.summary,
-          timeCaptured: data.timeCaptured
-        })
-        setSelectedCamera({...camera})
+      console.log(await des.json())
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+
+    intervalRef.current = setInterval(() => {
+      if (!camera.control.recording) return
+      const {imageDataURL, playbackTime} = getSnapshot()
+      // fetchDescription({imageDataURL, playbackTime})
+      // .then((data: {text: string; classified: [], summary: string, timeCaptured: Date}) => {
+      //   appendSnapshot({
+      //     text: data.text,
+      //     cameraId: camera.id,
+      //     classified: data.classified,
+      //     summary: data.summary,
+      //     timeCaptured: data.timeCaptured
+      //   })
+      //   setSelectedCamera({...camera})
       })
-      .catch(error => {
-        console.error('Error uploading image:', error);
-      });
-    }, 5000)
     return () => clearInterval(intervalRef.current)
   }, [])
   
@@ -211,7 +241,7 @@ function CameraResult({camera}: {camera: Camera}) {
       </div>
     </div>
     <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-
+          {/* <button onClick={fetchDescription}> capture </button> */}
     </>
   )
 }
