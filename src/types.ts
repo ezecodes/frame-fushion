@@ -11,6 +11,11 @@ type AppAlert = {
   message: string
 }
 
+type OnboardChoice = {
+  question: string;
+  option: string;
+}
+
 type SnapshotDescriptionClassification = {
   label: string; 
   score: number
@@ -70,5 +75,6 @@ export type {
   DetectedImageResponseArray,
   DetectedImage,
   AppAlert,
-  ActivityLog
+  ActivityLog,
+  OnboardChoice
 }

@@ -1,5 +1,5 @@
 import {create} from "zustand"
-import { Alert, Camera, DetectedImage, AppAlert, ActivityLog } from "./types";
+import { Alert, Camera, DetectedImage, AppAlert, ActivityLog, OnboardChoice } from "./types";
 
 type Store = {
   alerts: Alert[] | null;
@@ -13,11 +13,31 @@ type Store = {
   setCameraControl: (data: {cameraId: string; control: {audio: boolean} | {recording: boolean}}) => void;
   appendSnapshot: (data: {cameraId: string; text: string; classified: [], summary: string, timeCaptured: Date}) => void;
   appAlert: AppAlert | null;
-  setAppAlert: (data: AppAlert) => void
+  setAppAlert: (data: AppAlert) => void;
+  onboardingChoices: OnboardChoice[] | null;
+  setOnboardChoice: (data: OnboardChoice) => void
 };
 
 const useStore = create<Store>((set, get) => ({
   appAlert: null,
+  onboardingChoices: null,
+  setOnboardChoice(data) {
+    const find = get().onboardingChoices
+    if (!find) {
+      set({onboardingChoices: [data]})
+    } else {
+      const idx = find.findIndex(i => i.question === data.question)
+      if (idx === -1) {
+        set({onboardingChoices: [...get().onboardingChoices, data]})
+      } else {
+        find[idx].option = data.option
+        set({
+          onboardingChoices: find
+        })
+      }
+    }
+    console.log(get().onboardingChoices)
+  },
   setAppAlert({type, message}) {
     set({appAlert: {type, message}})
   },

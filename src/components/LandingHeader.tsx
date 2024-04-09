@@ -33,7 +33,7 @@ function NavManager() {
       {
         navItems.map((item, idx) => {
           return (
-            <Link to={item.href} className="hover:text-[white] capitalize font-[300] text-[.9rem] text-[white]">{item.link}</Link>
+            <Link key={idx} to={item.href} className="hover:text-[white] capitalize font-[300] text-[.9rem] text-[white]">{item.link}</Link>
           )
         })
       }

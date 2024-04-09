@@ -40,7 +40,7 @@
   width: var(--sidebars_width);
   min-height: 100vh;
   z-index: 10;
-  background-color: #32363b;
+  background-color: #252c35;
   padding-top: 90px;
 }
 li {
@@ -49,6 +49,14 @@ li {
 .sidebars > div {
 position: sticky;
     top: 100px;
+}
+.onb_ input[type="radio"]:checked + label {
+  color: #fff;
+  transition: .5s ease all;
+  text-decoration: underline;
+}
+.onb_ input[type="radio"]:not(:checked) + label {
+  color: #d3d3d3;
 }
 .poppins {
   font-family: "Poppins", sans-serif;
@@ -74,22 +82,27 @@ position: sticky;
   color: white;
   min-height: 100vh;
 }
-
-.main > div {
+.choice_bt {
+  font-size: .9rem;
+  color: #fff;
+  padding: 7px;
+    width: 120px;
+    border-radius: 5px;
+}
+.main .auto_w {
   margin: 0 auto;
 }
 @media screen and (min-width: 540px) {
-  .main > div {
+  .main .auto_w {
     width: 640px;
   }
 }
 @media screen and (min-width: 1024px) {
-  .main > div {
+  .main .auto_w {
     width: 1024px;
   }
 }
 a {
-  font-weight: 500;
   text-decoration: inherit;
   transition: all .2s ease;
 }
