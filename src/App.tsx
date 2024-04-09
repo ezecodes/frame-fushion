@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigation } from "react-router-dom"
 import AppHeader from "./components/AppHeader"
 import Sidebar from "./components/Sidebar"
 
@@ -31,9 +31,9 @@ function App() {
   
   return (
     <>
-    <section className='min-h-[100vh] flex flex-col'>
+    <section className='min-h-[100vh] bg-raisinBlack animate__animated animate__fadeIn flex flex-col'>
       <AppHeader />
-      <section className="bg-raisinBlack flex-1 flex">
+      <section className=" flex-1 flex">
         <Sidebar />
         <Outlet />
       </section>

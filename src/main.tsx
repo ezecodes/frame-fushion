@@ -21,21 +21,17 @@ const route = createBrowserRouter([
     element: <Onboard />
   },
   {
-    path: "/app",
+    path: "/simulation/app",
     element: <App />,
     children: [
       {
-        path: "/app",
-        element: <Dashboard />
-      },
-      {
-        path: "/app/surveillance",
+        path: "/simulation/app/surveillance",
         element: <Surveillance />
       },
       {
-        path: "/app/logs",
+        path: "/simulation/app/logs",
         element: <ActivityLogs />
-      }
+      },
     ]
   },
   {

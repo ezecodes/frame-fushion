@@ -42,37 +42,8 @@ const useStore = create<Store>((set, get) => ({
     set({appAlert: {type, message}})
   },
   alerts: null,
-  activityLogs: [
-    {
-      threatLevel: "low",
-      id: "log1",
-      thumbnail: "",
-      lastTimeCaptured: new Date(),
-      title: "2 Persons detected"
-    },
-    {
-      threatLevel: "critical",
-      id: "log2",
-      thumbnail: "",
-      lastTimeCaptured: new Date(),
-      title: "Gunmen found"
-    },
-  ],
-  cameraList: [
-    {
-      id: "camId1",
-      name: "nvidia rays",
-      location: "Video feed",
-      resolution: "360-34 PS",
-      videoFeed: "https://res.cloudinary.com/duqny6afm/video/upload/v1712368523/beyonglense/Action_Short_Film_-_EXTREME_VENGEANCE_zvbxaz.mp4",
-      snapshots: null,
-      control: {
-        recording: false,
-        audio: false
-      }
-    },
-    
-  ],
+  activityLogs: null,
+  cameraList: null,
   selectedCamera: null,
   setSelectedCamera(camera) {
     set({selectedCamera: camera})
