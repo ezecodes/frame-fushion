@@ -67,6 +67,27 @@ position: sticky;
   grid-template-columns: repeat(5, 1fr); /* Two equal columns */
   gap: 15px;
 }
+.main {
+  background-color: #1a2027;
+  padding-bottom: 20px; 
+
+  color: white;
+  min-height: 100vh;
+}
+
+.main > div {
+  margin: 0 auto;
+}
+@media screen and (min-width: 540px) {
+  .main > div {
+    width: 640px;
+  }
+}
+@media screen and (min-width: 1024px) {
+  .main > div {
+    width: 1024px;
+  }
+}
 a {
   font-weight: 500;
   text-decoration: inherit;

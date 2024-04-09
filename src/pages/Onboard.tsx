@@ -1,7 +1,10 @@
+import LandingHeader from "../components/LandingHeader"
 function Onboard() {
   return (
-    <section className="bg-raisinBlack min-h-[100vh] flex flex-col">
-
+    <section className="bg-raisinBlack poppins main">
+      <div>
+        <LandingHeader />
+      </div>
     </section>
     
   )

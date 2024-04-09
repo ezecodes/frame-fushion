@@ -1,56 +1,20 @@
 import { Link } from "react-router-dom"
 import { CgArrowsExpandUpLeft } from "react-icons/cg";
-import { FaCircleCheck } from "react-icons/fa6";
 import { MdEngineering } from "react-icons/md";
-
-const navItems = [
-  {
-    href: '/features',
-    link: "features",
-    navItems: [
-      
-    ],
-  },
-  {
-    href: '/support',
-    link: "support"
-  },
-  {
-    href: '/contact',
-    link: "contact"
-  }
-]
-
-function NavManager() {
-  return (
-    <nav className="flex items-center gap-x-[20px]" style={{}}>
-      {
-        navItems.map((item, idx) => {
-          return (
-            <Link to={item.href} className="hover:text-[white] capitalize font-[300] text-[.9rem] text-[white]">{item.link}</Link>
-          )
-        })
-      }
-    </nav>
-  )
-}
+import LandingHeader from "../components/LandingHeader"
 
 function Landing() {
   return (
-    <section className="bg-[#1a2027] pb-5 poppins text-[white] min-h-[100vh] " style={{}}>
-      <div className="md:w-[640px] mx-[auto]  lg:w-[1024px] ">
-        <header className="py-5 flex justify-between" style={{borderBottom: "1px solid #242a31"}} >
-          <span className="font-[400] text-[white] text-[1.5rem]">GG</span>
-          <NavManager />
-          
-        </header>
+    <section className="main bg-raisinBlack poppins" style={{}}>
+      <div className=" ">
+        <LandingHeader />
         <div className="mt-[60px] w-[100%] md:w-[600px] mx-[auto] text-center ">
           <h1 className="text-[2.5rem] font-[400] mb-[20px]">Empowering Security <br />with <span className="text-[#ffca4c]">AI Insights</span></h1>
           <p className="text-[.9rem] text-[#d3d3d3] font-[300]">Experience peace of mind with our AI-powered surveillance.<br /> Detect and respond to threats quickly and effectively. </p>
           <Link to="/onboard" className="font-[300] px-4 py-2 block w-[150px] mx-[auto] mt-5 text-[.95rem] rounded-md bg-prussianBlue">Get started</Link>
           
         </div>
-        <div className="my-[90px] flex gap-x-[70px] mx-[auto] py-[25px] px-5 bg-[#191e25] rounded-md relative">
+        <div title="Powered by cloudflare" className="my-[90px] flex gap-x-[70px] mx-[auto] py-[25px] px-5 bg-[#242b33] shadow-2xl rounded-md relative">
           <div className="w-[100px] h-[auto]">
             <a href="https://cloudflare.com"><img src="/cloudflare.svg" className="w-full h-full" /></a>
             {/* <span>Cloudflare</span> */}
@@ -66,7 +30,7 @@ function Landing() {
         
       </div>
       
-      <button className="heartbeat bg-raisinBlack px-4 py-2 rounded-md absolute bottom-[50px] flex gap-x-[10px] right-[50px]">
+      <button className=" bg-[#242b33] px-4 py-2 text-[.9rem] rounded-md fixed bottom-[30px] flex gap-x-[10px] right-[30px]">
         <CgArrowsExpandUpLeft className="text-[1.2rem]" />
         Sponsor
       </button>
@@ -101,7 +65,7 @@ const models = [
 function ModelsList() {
 
   return (
-    <div className="m_list">
+    <div className="flex flex-col md:flex-row gap-x-[20px] gap-y-[20px]">
       {
         models.map((model, idx) => {
           return (
