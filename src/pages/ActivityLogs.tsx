@@ -68,8 +68,8 @@ function ActivityLogs() {
     console.log(selectedLevels)
   }
   return (
-    <section className="px-[40px]  poppins">
-      <DashHeader text={"activity logs"} />
+    <section className="px-[40px] py-[30px] animate__animated animate__fadeIn">
+      {/* <DashHeader text={"activity logs"} /> */}
       <div>
         <Searchbar />
       </div>

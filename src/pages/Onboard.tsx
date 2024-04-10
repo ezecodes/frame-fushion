@@ -111,7 +111,7 @@ function Onboard() {
             </div>
           </div>
           : <div className='auto_w animate__animated animate__fadeInUp animate__delay-1s'>
-            <h1 className='text-[1rem] w-full leading-6 md:w-[600px] text-center mx-[auto]'> <span className="block mb-5 font-[400] text-[2rem]">Welcome to German Guard!</span> <span className="text-[#ffca4c]">Ready to start?</span> Customize your experience now or jump right in. Your choice!</h1>
+            <h1 className='text-[1rem] w-full leading-6 md:w-[600px] text-center mx-[auto]'> <span className="block mb-5 font-[400] text-[2rem]">Welcome to Surveillance Shield!</span> <span className="text-[#ffca4c]">Ready to start?</span> Customize your experience now or jump right in. Your choice!</h1>
             <div className="flex gap-x-[15px] justify-center mt-[25px]">
               <button className="choice_bt bg-prussianBlue" onClick={updateIndex}> 
                 Let's begin 

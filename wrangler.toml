@@ -5,3 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [ai]
 binding = "AI"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "database"
+database_id = "13e9ed9b-4e2b-407a-a752-3e73cb16a61b"

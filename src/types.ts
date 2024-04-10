@@ -22,9 +22,11 @@ type SnapshotDescriptionClassification = {
 }
 
 type Snapshot = {
-  path?: string;
-  timeCaptured: Date,
-  description: {
+  path: string;
+  id: string;
+  timeCaptured: Date;
+  playbackTime: number;
+  description?: {
     text: string;
     classified: SnapshotDescriptionClassification[],
     summary: string
@@ -37,6 +39,22 @@ type ActivityLog = {
   thumbnail: string;
   title: string;
   lastTimeCaptured: string | Date
+}
+
+type StoredVideo = {
+  id: string;
+  path: string;
+  name: string;
+  type: string;
+  size: number;
+  duration: number;
+}
+
+type OngoingAnalysis = {
+  videoId: string;
+  timeStarted: Date
+  timeEnded?: Date;
+  snapshots?: Snapshot[]
 }
 
 type Camera = {
@@ -75,6 +93,9 @@ export type {
   DetectedImageResponseArray,
   DetectedImage,
   AppAlert,
+  Snapshot,
   ActivityLog,
+  StoredVideo,
+  OngoingAnalysis,
   OnboardChoice
 }

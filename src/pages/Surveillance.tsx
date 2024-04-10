@@ -1,26 +1,48 @@
 import { useEffect, useState, useRef } from "react";
 import { useStore } from "../store"
-import { Camera, DetectedImageResponseArray } from "../types";
-import { BiSolidVideoRecording } from "react-icons/bi";
+import {  StoredVideo, Snapshot } from "../types";
 import { TbLayoutList } from "react-icons/tb";
 import { BsColumnsGap } from "react-icons/bs";
 import Threats from "../components/Threats"
-import { Audio, Puff } from "react-loader-spinner";
 import { AiOutlineAudio, AiOutlineAudioMuted } from "react-icons/ai";
 import Searchbar from "../components/Searchbar"
-import DashHeader from "../components/DashHeader";
 import { IoMdCloseCircleOutline } from "react-icons/io";
+import {v4 as uuid} from "uuid"
+import { BiAnalyse, BiDotsVertical } from "react-icons/bi";
 
-function ControlButton({control}: {control: {text?: string; icon?: any; click: () => void}}) {
+function SelectedOngoingAnalysis() {
+  const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
+  
   return (
-    <button onClick={control.click} className="h-[35px] text-[white] flex justify-center items-center text-[1.3rem] w-[35px] bg-[rgba(0,0,0,.5)] rounded-[40px]">
-      {
-        control.text ? control.text
-        : control.icon
-      }
-    </button>
+    <aside className="fixed z-[20] left-[200px] px-5 w-[85vw]  animate__animated animate__slideInUp bottom-0 h-[90px] bg-[#252d37]">
+      <div className="w-[95%] overflow-x-scroll flex gap-x-[20px] items-center h-full">
+        {
+          ongoingAnalysis.snapshots?.length > 0 &&
+          ongoingAnalysis.snapshots.map(item => {
+            return (
+              <img key={item.id} src={item.path} className="w-[100px] h-[80px]" />
+            )
+          })
+        }
+      </div>
+      <button className="absolute right-[30px] px-1  py-1 bottom-[30px]">
+        <BiDotsVertical />
+        {/* <div className="">
+          <span></span>
+        </div> */}
+      </button>
+    </aside>
   )
 }
+
+function AnalysisPopup() {
+  return (
+    <div className="">
+
+    </div>
+  )
+}
+
 function CameraManager({ closeModal}) {
   return (
     <div className="fixed modal_overlay ">
@@ -31,49 +53,233 @@ function CameraManager({ closeModal}) {
         </div>
       </div>
     </div>
-
   )
 }
+
+function UploadedVideo(
+  {
+    video,
+    click, 
+    isClicked,
+  }: { 
+    video: StoredVideo;
+    isClicked: boolean; 
+    click: (id: string) => void,
+  }
+) {
+  const videoRef = useRef(null)
+  const videoSrcRef = useRef(null)
+  const setOngoingAnalysis = useStore(state => state.setOngoingAnalysis)
+  const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
+  const setAppAlert = useStore(state => state.setAppAlert)
+  const setAnalysisSnapshots = useStore(state => state.setAnalysisSnapshots)
+  const updateSnapshots = useStore(state => state.updateSnapshots)
+  const intervalRef = useRef(null)
+  const nextTick = useRef(0)
+  
+  function getDataUrl(tick: number) : string {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const { videoWidth, videoHeight } = videoRef.current;
+
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+    context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
+    const frameDataUrl = canvas.toDataURL('image/png');
+    
+    return frameDataUrl
+  }
+
+  function analyseVideo() {
+    if (ongoingAnalysis && !ongoingAnalysis.timeEnded) {
+      setAppAlert({type: "error", message: "Current running analysis must be cancelled to begin a new one"})
+      return 
+    }
+    if (ongoingAnalysis && ongoingAnalysis.timeEnded) {
+      setAppAlert({type: "warn", message: "Please download previous analysis result to begin a new one."})
+      return 
+    }
+    setOngoingAnalysis({videoId: video.id, timeStarted: new Date()})
+    intervalRef.current = setInterval(() => {
+      videoRef.current.currentTime = nextTick.current
+      const snapshot = {
+        path: getDataUrl(nextTick.current),
+        id: uuid(),
+        playbackTime: videoRef.current.currentTime,
+        timeCaptured: new Date(),
+      }
+      updateSnapshots(snapshot)
+      if (nextTick.current > videoRef.current.duration) {
+        clearInterval(intervalRef.current)
+        return
+      }
+      nextTick.current += 10
+      
+    }, 1000)
+    
+  }
+
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current)
+  }, [])
+
+  return (
+    <div className={`cam_res ${isClicked ? "active" : ""} rounded-md relative poppins mb-[20px]`} onClick={() => {
+      click(video.id)
+    }}>
+      <div className="flex justify-between z-[11]">
+        <div className="font-[400] text-[.9rem] flex flex-col">
+          {video.name} <br />
+          <span className="text-[#b9d2ff]">{video.type} &nbsp; {(video.size / (1024 * 1024)).toFixed(2)}mb</span>  
+        </div>
+        
+      </div>
+      <div className="w-full h-full">
+         <video crossOrigin="anonymous" autoFocus className="h-[inherit] w-[inherit]" ref={videoRef} controlsList={"nodownload, nofullscreen"}>
+            <source src={video.path} ref={videoSrcRef} /> 
+         </video>
+      </div>
+      <div className="absolute z-[11] flex gap-x-[10px] left-[10px] bottom-[20px]">
+        <button onClick={analyseVideo} className="control_btn">
+          <BiAnalyse title="Analyse video" className={ongoingAnalysis?.videoId === video.id ? "rotate-center" : ""} />
+        </button>
+        <button onClick={() => {}} className="control_btn">
+          <AiOutlineAudio title="Include audio in analysis" />
+        </button>
+      </div>
+      {/* { ongoingAnalysis && ongoingAnalysis.videoId === video.id ?
+        <div className="absolute top-0 flex flex-col items-center justify-center w-full h-full bg-[rgba(255,255,255,.4)]">
+          
+        </div> :
+        <></>
+      } */}
+    </div>
+  )
+}
+
 function Surveillance() {
   const cameraList = useStore(state => state.cameraList)
   const [layout, setLayout] = useState<"column" | "row">("row")
   const selectedCamera = useStore(state => state.selectedCamera)
+  const storedVideos = useStore(state => state.storedVideos)
+  const storeVideo = useStore(state => state.storeVideo)
+  const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
   const [showModal, setModal] = useState(false)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const setAppAlert = useStore(state => state.setAppAlert)
+  const tempVidRef = useRef<HTMLVideoElement>(null)
+  // const workerRef = useRef(null)
+
+  useEffect(() => {
+    // const worker = new Worker("../worker.js");
+    // workerRef.current = worker
+  }, [])
+
+  function isDuplicate(name: string) : boolean {
+    if (!storedVideos) return false
+    const findIdx = storedVideos.findIndex(i => i.name === name)
+    if (findIdx !== -1) return true
+    return false
+  }
+
+  function handleVideoUpload(event: any) {
+    const file = event.target.files[0];
+    if (isDuplicate(file.name)) {
+      setAppAlert({type: "error", message: "This video has already been uploaded"})
+    } else {
+      const url = URL.createObjectURL(file);
+      tempVidRef.current.src = url
+      storeVideo({
+        duration: tempVidRef.current.duration,
+        id: uuid(),
+        name: file.name,
+        path: url,
+        size: file.size,
+        type: file.type,
+      })
+    }
+    
+    
+  }
+  useEffect(() => {
+
+  }, [ongoingAnalysis?.videoId])
   
   return (
     <>
-    <div className="px-[40px] animate__animated animate__fadeIn flex-1 justify-between mx-[auto] poppins text-[white] ">
+    <div className="px-[40px] py-[30px] animate__animated animate__fadeIn flex-1 justify-between mx-[auto] poppins text-[white] ">
       <div className="">
-      <DashHeader text={"surveillance"} />
+        {/* <DashHeader text={"surveillance"} /> */}
+        <div className="flex justify-between mb-[30px]">
+          <div className="flex gap-x-[10px]">
+            <Searchbar />
+            <button className="text-[#8b8b8b] text-[1.2rem] flex items-center gap-x-[10px]">
+              <TbLayoutList onClick={() => setLayout("column")} className={`${layout === "column" ? "text-[white]" : ""}`} />
+              <BsColumnsGap onClick={() => setLayout("row")} className={`${layout === "row" ? "text-[white]" : ""}`} />
+            </button>
+          </div>
 
-        <div className="flex gap-x-[10px] mb-[50px]">
-          <Searchbar />
-          <button className="text-[#8b8b8b] text-[1.5rem] flex gap-x-[10px]">
-            <TbLayoutList onClick={() => setLayout("column")} className={`${layout === "column" ? "text-[white]" : ""}`} />
-            <BsColumnsGap onClick={() => setLayout("row")} className={`${layout === "row" ? "text-[white]" : ""}`} />
-          </button>
+          <div className="flex gap-x-[20px]">
+            { (function() {
+              if (!cameraList && !storedVideos) {
+                return <></>
+              }
+              if (cameraList || storedVideos) {
+                return (
+                  <div className="flex items-center gap-x-[20px]">
+                    <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
+                    <label className="app_button mt-5" htmlFor="vidUpload">Upload video</label>
+                    <input type="file" accept="video/*" id="vidUpload" className="hidden" onChange={handleVideoUpload} />
+                  </div>
+                )
+              }
+            }())}
+          </div>
+          
         </div>
         <div className={`cam_res_wrap ${layout === "column" ? "column" : "row"} `}>
-          { cameraList &&
-            cameraList.map((camera, idx) => 
-              <CameraResult 
-                key={idx} 
-                camera={camera} 
-              />
-            )
+          
+          {
+            storedVideos && storedVideos.length > 0 ?
+            storedVideos.map((video) => {
+              return (
+                <UploadedVideo 
+                  video={video}
+                  click={id => setSelectedVideo(id)}
+                  key={video.id}
+                  isClicked={selectedVideo === video.id}
+                />
+              )
+            })
+            : <></>
           }
         </div>
         <div>
           {
-            !cameraList ?
-            <div className="subtext rounded-md flex justify-center mt-[50px] bg-[#161a1e] w-[400px] flex flex-col items-center mx-[auto] py-5">
-              <h2>Add a camera to show your video feed</h2>
-              <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
+            !cameraList && !storedVideos ?
+            <div className="subtext rounded-md flex justify-center mt-[50px] bg-[#161a1e] w-[400px] flex flex-col text-center items-center mx-[auto] py-5 px-4">
+              <h2>No camera? Upload a video and watch surveillance shield in action.</h2>
+
+              <div className="flex items-center gap-x-[20px]">
+                <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
+                <label className="app_button mt-5" htmlFor="vidUpload">Upload video</label>
+                <input type="file" accept="video/*" id="vidUpload" className="hidden" onChange={handleVideoUpload} />
+              </div>
+              
             </div>
             : <></>
           }
+          
         </div>
       </div>
+      <video ref={tempVidRef} style={{display: 'none'}}></video>
+      
+    {
+      ongoingAnalysis && ongoingAnalysis.snapshots?.length > 0 ?
+        <SelectedOngoingAnalysis />
+      : <></>
+    }
     </div>
     {
       selectedCamera && 
@@ -84,164 +290,6 @@ function Surveillance() {
       <CameraManager closeModal={() => setModal(false)} /> 
       : <></> 
     }
-    </>
-  )
-}
-
-function CameraResult({camera}: {camera: Camera}) {
-  const setSelectedCamera = useStore(state => state.setSelectedCamera)
-  const selectedCamera = useStore(state => state.selectedCamera)
-  const appendSnapshot = useStore(state => state.appendSnapshot)
-  const intervalRef = useRef(null)
-  const setCameraControl = useStore(state => state.setCameraControl)
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const videoSrcRef = useRef<HTMLSourceElement | null>(null)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-
-  const getSnapshot = () => {
-    const videoElement = videoRef.current;
-    const canvasElement = canvasRef.current;
-    const ctx = canvasElement.getContext('2d');
-
-    canvasElement.width = videoElement.videoWidth;
-    canvasElement.height = videoElement.videoHeight;
-
-    ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-    const imageDataURL = canvasElement.toDataURL('image/png');
-    return {imageDataURL, playbackTime: videoElement.currentTime}
-
-  };
-  useEffect(() => {
-    if (!videoRef.current) return
-    if (camera.control.recording) {
-      videoRef.current.play()
-    } else {
-      videoRef.current.pause()
-
-    }
-  }, [camera.control.recording])
-
-  useEffect(() => {
-    if (!videoRef.current) return
-    if (camera.control.audio) {
-      videoRef.current.muted = false
-    } else {
-      videoRef.current.muted = true
-
-    }
-  }, [camera.control.audio])
-
-  async function fetchDescription() {
-    const {imageDataURL, playbackTime} = getSnapshot()
-    try {
-      const des = await fetch('http://127.0.0.1:8787/api/secured/snapshot/describe', {
-        method: 'POST',
-        body: JSON.stringify({imageDataURL, playbackTime}),
-        headers: {
-          'Content-Type': 'text/plain'
-        }
-      })
-      console.log(await des.json())
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  useEffect(() => {
-
-    intervalRef.current = setInterval(() => {
-      if (!camera.control.recording) return
-      const {imageDataURL, playbackTime} = getSnapshot()
-      // fetchDescription({imageDataURL, playbackTime})
-      // .then((data: {text: string; classified: [], summary: string, timeCaptured: Date}) => {
-      //   appendSnapshot({
-      //     text: data.text,
-      //     cameraId: camera.id,
-      //     classified: data.classified,
-      //     summary: data.summary,
-      //     timeCaptured: data.timeCaptured
-      //   })
-      //   setSelectedCamera({...camera})
-      })
-    return () => clearInterval(intervalRef.current)
-  }, [])
-  
-
-  return (
-    <>
-    <div className={`cam_res ${selectedCamera && selectedCamera.id === camera.id ? "active" : ""} relative poppins mb-[20px]`} onClick={() => {
-      setSelectedCamera({...camera})
-    }}>
-      <div className="flex justify-between z-[11]">
-        <div className="font-[400] text-[.9rem] flex flex-col">
-          {camera.location} <br />
-          <span className="text-[#b9d2ff]">{camera.resolution}</span>  
-        </div>
-       <div className="flex items-center gap-x-[20px]">
-        {
-          camera.control.recording ?
-          <Puff
-            visible={true}
-            height="15"
-            width="15"
-            color="red"
-            ariaLabel="puff-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          /> :
-          <></>
-        }
-        {
-          camera.control.audio ?
-          <Audio
-            height="15"
-            width="15"
-            color="#4fa94d"
-            ariaLabel="audio-loading"
-            wrapperStyle={{}}
-            wrapperClass="wrapper-class"
-            visible={true}
-          /> : <></>
-        }
-        
-          
-        </div> 
-        
-      </div>
-      <div className="w-full h-full">
-         <video crossOrigin="anonymous" className="h-[inherit] w-[inherit]" ref={videoRef} autoPlay={true} loop controlsList={"nodownload, nofullscreen"}>
-          <source src={camera.videoFeed} ref={videoSrcRef} /> 
-         </video>
-        {/* <img src={camera.snapshots.at(-1)?.path} className="z-[9] h-[inherit] w-[inherit]" />  */}
-       
-      </div>
-      <div className="absolute z-[11] flex gap-x-[10px] left-[10px] bottom-[20px]">
-        <ControlButton
-          control={{
-            icon: <BiSolidVideoRecording />,
-            click: () => {
-              setCameraControl({
-                control: {recording: !camera.control.recording},
-                cameraId: camera.id
-              })
-            }
-          }}
-        />
-        <ControlButton
-          control={{
-            icon: camera.control.audio ? <AiOutlineAudio  /> : <AiOutlineAudioMuted />,
-            click: () => {
-              setCameraControl({
-                control: {audio: !camera.control.audio},
-                cameraId: camera.id
-              })
-            }
-          }}
-        />
-      </div>
-    </div>
-    <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-          {/* <button onClick={fetchDescription}> capture </button> */}
     </>
   )
 }

@@ -1,5 +1,5 @@
 import {create} from "zustand"
-import { Alert, Camera, DetectedImage, AppAlert, ActivityLog, OnboardChoice } from "./types";
+import { Alert, Camera, DetectedImage, AppAlert, ActivityLog, OnboardChoice, StoredVideo, OngoingAnalysis, Snapshot } from "./types";
 
 type Store = {
   alerts: Alert[] | null;
@@ -11,16 +11,63 @@ type Store = {
   detectedImages: DetectedImage[] | null;
   setDetectedImage: (detectedImage: DetectedImage) => void;
   setCameraControl: (data: {cameraId: string; control: {audio: boolean} | {recording: boolean}}) => void;
-  appendSnapshot: (data: {cameraId: string; text: string; classified: [], summary: string, timeCaptured: Date}) => void;
   appAlert: AppAlert | null;
-  setAppAlert: (data: AppAlert) => void;
+  setAppAlert: (data: AppAlert | null) => void;
   onboardingChoices: OnboardChoice[] | null;
-  setOnboardChoice: (data: OnboardChoice) => void
+  setOnboardChoice: (data: OnboardChoice) => void;
+  storeVideo: (data: StoredVideo) => void;
+  storedVideos: StoredVideo[] | null;
+  ongoingAnalysis: OngoingAnalysis | null;
+  setOngoingAnalysis: (data: OngoingAnalysis) => void;
+  updateAnalysisSingleSnapshot: ({snapshotId, videoId}, snapshot: Snapshot) => void;
+  setAnalysisSnapshots: (snapshots: Snapshot[]) => void;
+  updateSnapshots: (snapshot: Snapshot) => void;
 };
 
 const useStore = create<Store>((set, get) => ({
   appAlert: null,
   onboardingChoices: null,
+  storedVideos: null,
+  ongoingAnalysis: null,
+  updateAnalysisSingleSnapshot({snapshotId, videoId}, snapshot) {
+    const item = get().ongoingAnalysis
+    if (!item || item.videoId !== videoId) return
+    const findIdx = item.snapshots.findIndex(i => i.id === snapshotId)
+    item.snapshots[findIdx] = {...snapshot}
+    set({ongoingAnalysis: item})
+  },
+  updateSnapshots(snapshot) {
+    const snapshots = get().ongoingAnalysis?.snapshots || []
+    set({
+      ongoingAnalysis: {
+        ...get()?.ongoingAnalysis,
+        snapshots: [...snapshots, snapshot]
+      }
+    })
+  },
+  setAnalysisSnapshots(snapshots) {
+    const item = get().ongoingAnalysis
+    if (!item) return
+    item.snapshots = snapshots
+    set({
+      ongoingAnalysis: item
+    })
+    console.log(get().ongoingAnalysis)
+
+  },
+  setOngoingAnalysis(data) {
+    set({
+      ongoingAnalysis: data
+    })
+  },
+  storeVideo(data) {
+    let videos = get().storedVideos
+    if (!videos) {
+      set({storedVideos: [data]})
+    } else {
+      set({storedVideos: [...videos, data]})
+    }
+  },
   setOnboardChoice(data) {
     const find = get().onboardingChoices
     if (!find) {
@@ -38,8 +85,8 @@ const useStore = create<Store>((set, get) => ({
     }
     console.log(get().onboardingChoices)
   },
-  setAppAlert({type, message}) {
-    set({appAlert: {type, message}})
+  setAppAlert(data) {
+    set({appAlert: data})
   },
   alerts: null,
   activityLogs: null,
@@ -75,26 +122,6 @@ const useStore = create<Store>((set, get) => ({
     all[findCamera].control = {...all[findCamera].control, ...control}
     set({cameraList: all})
   },
-  appendSnapshot({cameraId, text, classified, summary, timeCaptured}) {
-    const cameraList = get().cameraList
-    if (!cameraList) return
-    const findCamera = cameraList.findIndex(i => i.id === cameraId)
-    const newSnapshot = {
-      timeCaptured,
-      description: {
-        text,
-        classified,
-        summary
-      }
-    }
-    if (!cameraList[findCamera].snapshots) {
-      cameraList[findCamera].snapshots = [newSnapshot]
-    } else {
-      cameraList[findCamera].snapshots.push(newSnapshot)
-    }
-    console.log(cameraList)
-    set({cameraList})
-  }
 }))
 
 export {
