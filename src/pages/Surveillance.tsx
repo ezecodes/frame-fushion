@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, fragment } from "react";
 import { useStore } from "../store"
 import {  StoredVideo, Snapshot } from "../types";
 import { TbLayoutList } from "react-icons/tb";
@@ -9,18 +9,37 @@ import Searchbar from "../components/Searchbar"
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import {v4 as uuid} from "uuid"
 import { BiAnalyse, BiDotsVertical } from "react-icons/bi";
+import { GoAlertFill } from "react-icons/go";
+import { MdOutlineSlowMotionVideo } from "react-icons/md";
+import { FaRegCirclePlay } from "react-icons/fa6";
+import { MdOutlinePauseCircleOutline } from "react-icons/md";
 
 function SelectedOngoingAnalysis() {
   const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
-  
+  const setSelectedSnapshot = useStore(state => state.setSelectedSnapshot)
+  const selectedSnapshot = useStore(state => state.selectedSnapshot)
+
   return (
     <aside className="fixed z-[20] left-[200px] px-5 w-[85vw]  animate__animated animate__slideInUp bottom-0 h-[90px] bg-[#252d37]">
-      <div className="w-[95%] overflow-x-scroll flex gap-x-[20px] items-center h-full">
+      <div className="w-[95%]  overflow-x-scroll  gap-x-[20px] grid-flow-col grid items-center h-full">
         {
           ongoingAnalysis.snapshots?.length > 0 &&
           ongoingAnalysis.snapshots.map(item => {
+            const positiveLabel = item.description.classified.find(i => i.label === "POSITIVE")
+            const negativeLabel = item.description.classified.find(i => i.label === "NEGATIVE")
+
+            const posDiff = positiveLabel.score - negativeLabel.score
+            const negDiff = negativeLabel.score - positiveLabel.score
+            
+
             return (
-              <img key={item.id} src={item.path} className="w-[100px] h-[80px]" />
+              <div  key={item.id} onClick={() => setSelectedSnapshot(item)} className={`w-[100px] cursor-pointer relative h-[80px] animate__animated animate__slideInLeft ${selectedSnapshot && selectedSnapshot.id === item.id ? "active" : ""} `}>
+                <img key={item.id} src={item.path} className="w-full h-full " />
+                { negDiff > posDiff ?
+                  <GoAlertFill className="absolute red top-[30px] left-[40px]" />
+                  : <></>
+                }
+              </div>
             )
           })
         }
@@ -43,13 +62,33 @@ function AnalysisPopup() {
   )
 }
 
-function CameraManager({ closeModal}) {
+function SnapshotDetail({ closeModal, snapshot, }) {
   return (
     <div className="fixed modal_overlay ">
       <div className="modal px-4 py-4 animate__animated animate__zoomIn rounded-sm">
-        <div className="flex justify-between">
-          <h2>Add Camera</h2>
+        <div className="flex justify-between mb-[30px]">
+          <h2>Selected snapshot</h2>
           <IoMdCloseCircleOutline onClick={closeModal} className="text-[1.3rem] cursor-pointer" />
+        </div>
+
+        <div className="flex flex-col">
+          <div className="flex items-center gap-x-[30px]"> 
+            <div className="">
+              <img src={snapshot.path} className="w-[250px] h-full" />
+            </div>
+            <div className="my-5 text-[2rem]">
+              <MdOutlineSlowMotionVideo 
+                className="cursor-pointer" 
+                onClick={() => {
+                  seekPlayback(snapshot.playbackTime)} 
+                }
+              />
+            </div>
+          </div>
+            
+          <div className="text-[.8rem] my-5">
+            <span> {snapshot.description.summary} </span>
+          </div>
         </div>
       </div>
     </div>
@@ -74,8 +113,10 @@ function UploadedVideo(
   const setAppAlert = useStore(state => state.setAppAlert)
   const setAnalysisSnapshots = useStore(state => state.setAnalysisSnapshots)
   const updateSnapshots = useStore(state => state.updateSnapshots)
+  const updateVideo = useStore(state => state.updateVideo)
   const intervalRef = useRef(null)
   const nextTick = useRef(0)
+  const snapshotRef = useRef([])
   
   function getDataUrl(tick: number) : string {
     const canvas = document.createElement('canvas');
@@ -88,6 +129,43 @@ function UploadedVideo(
     const frameDataUrl = canvas.toDataURL('image/png');
     
     return frameDataUrl
+  }
+
+  async function* fetchAnalysis() {
+    let currentPos = 0
+    while (currentPos < snapshotRef.current.length) {
+      try {
+        const result = await fetch("http://127.0.0.1:8787/api/secured/describe", {
+          method: 'POST',
+          body: JSON.stringify({imageDataURL: snapshotRef.current[currentPos].path, snapshotId: snapshotRef.current[currentPos].id}),
+          headers: {
+            'Content-Type': 'text/plain'
+          }
+        })
+        currentPos += 1
+        const jsonBody = await result.json()
+        yield jsonBody
+      } catch (err) {
+        console.error(err)
+      }
+      
+    }
+  }
+
+  async function analyseSnapshots() {
+    for await (let result of fetchAnalysis()) {
+      if (result.success) {
+        const findSnapshot = snapshotRef.current.find(i => i.id === result.data.snapshotId)
+        if (findSnapshot) {
+          findSnapshot.description = {
+            text: result.data.summary,
+            summary: result.data.summary,
+            classified: result.data.classified
+          }
+          updateSnapshots(findSnapshot)
+        }
+      }
+    }
   }
 
   function analyseVideo() {
@@ -108,14 +186,15 @@ function UploadedVideo(
         playbackTime: videoRef.current.currentTime,
         timeCaptured: new Date(),
       }
-      updateSnapshots(snapshot)
+      snapshotRef.current.push(snapshot)
       if (nextTick.current > videoRef.current.duration) {
         clearInterval(intervalRef.current)
+        analyseSnapshots()
         return
       }
-      nextTick.current += 10
+      nextTick.current += 20
       
-    }, 1000)
+    }, 200)
     
   }
 
@@ -123,12 +202,17 @@ function UploadedVideo(
     return () => clearInterval(intervalRef.current)
   }, [])
 
+  useEffect(() => {
+    if (video.controls.playing) videoRef.current.play()
+    else videoRef.current.pause()
+  }, [video.controls.playing])
+
   return (
     <div className={`cam_res ${isClicked ? "active" : ""} rounded-md relative poppins mb-[20px]`} onClick={() => {
       click(video.id)
     }}>
       <div className="flex justify-between z-[11]">
-        <div className="font-[400] text-[.9rem] flex flex-col">
+        <div className="font-[400] text-[.8rem] flex gap-y-[5px] flex-col">
           {video.name} <br />
           <span className="text-[#b9d2ff]">{video.type} &nbsp; {(video.size / (1024 * 1024)).toFixed(2)}mb</span>  
         </div>
@@ -143,16 +227,24 @@ function UploadedVideo(
         <button onClick={analyseVideo} className="control_btn">
           <BiAnalyse title="Analyse video" className={ongoingAnalysis?.videoId === video.id ? "rotate-center" : ""} />
         </button>
-        <button onClick={() => {}} className="control_btn">
-          <AiOutlineAudio title="Include audio in analysis" />
+        <button className="control_btn">
+          {
+            video.controls.playing ? 
+            <MdOutlinePauseCircleOutline onClick={() => updateVideo(video.id, {controls: {playing: false}})} />
+            : <FaRegCirclePlay onClick={() => updateVideo(video.id, {controls: {playing: true}})} />
+          }
         </button>
+          
+        {/*<button onClick={() => {}} className="control_btn">
+          <AiOutlineAudio title="Include audio in analysis" />
+        </button>*/}
       </div>
-      {/* { ongoingAnalysis && ongoingAnalysis.videoId === video.id ?
+      { ongoingAnalysis && ongoingAnalysis.videoId === video.id ?
         <div className="absolute top-0 flex flex-col items-center justify-center w-full h-full bg-[rgba(255,255,255,.4)]">
           
         </div> :
         <></>
-      } */}
+      }
     </div>
   )
 }
@@ -170,6 +262,8 @@ function Surveillance() {
   const setAppAlert = useStore(state => state.setAppAlert)
   const tempVidRef = useRef<HTMLVideoElement>(null)
   // const workerRef = useRef(null)
+  const selectedSnapshot = useStore(state => state.selectedSnapshot)
+  const setSelectedSnapshot = useStore(state => state.setSelectedSnapshot)
 
   useEffect(() => {
     // const worker = new Worker("../worker.js");
@@ -197,6 +291,9 @@ function Surveillance() {
         path: url,
         size: file.size,
         type: file.type,
+        controls: {
+          playing: false
+        }
       })
     }
     
@@ -228,7 +325,6 @@ function Surveillance() {
               if (cameraList || storedVideos) {
                 return (
                   <div className="flex items-center gap-x-[20px]">
-                    <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
                     <label className="app_button mt-5" htmlFor="vidUpload">Upload video</label>
                     <input type="file" accept="video/*" id="vidUpload" className="hidden" onChange={handleVideoUpload} />
                   </div>
@@ -262,7 +358,6 @@ function Surveillance() {
               <h2>No camera? Upload a video and watch surveillance shield in action.</h2>
 
               <div className="flex items-center gap-x-[20px]">
-                <button className="app_button mt-5" onClick={() => setModal(true)}>Add Camera</button>
                 <label className="app_button mt-5" htmlFor="vidUpload">Upload video</label>
                 <input type="file" accept="video/*" id="vidUpload" className="hidden" onChange={handleVideoUpload} />
               </div>
@@ -276,7 +371,7 @@ function Surveillance() {
       <video ref={tempVidRef} style={{display: 'none'}}></video>
       
     {
-      ongoingAnalysis && ongoingAnalysis.snapshots?.length > 0 ?
+      ongoingAnalysis && ongoingAnalysis.snapshots && ongoingAnalysis.snapshots.length > 0 ?
         <SelectedOngoingAnalysis />
       : <></>
     }
@@ -286,8 +381,11 @@ function Surveillance() {
       <Threats />
     }
     {
-      showModal ? 
-      <CameraManager closeModal={() => setModal(false)} /> 
+      selectedSnapshot ? 
+      <SnapshotDetail 
+        closeModal={() => setSelectedSnapshot(null)} 
+        snapshot={selectedSnapshot} 
+      /> 
       : <></> 
     }
     </>
