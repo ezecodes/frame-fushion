@@ -1,13 +1,12 @@
 import { IoMdEye } from "react-icons/io";
-import {Link, useLocation, useNavigate,} from "react-router-dom"
+import {Link, useLocation,} from "react-router-dom"
 import { MdOutlineDataExploration } from "react-icons/md";
 import PsuedoLogo from "./PsuedoLogo";
-import { BiLogOut } from "react-icons/bi";
 
 const links = [
   {
-    name: "Surveillance",
-    href: "/simulation/app/surveillance",
+    name: "Analysis",
+    href: "/simulation/app/analysis",
     icon: <IoMdEye className="text-[1.2rem]" />
   },
   {
@@ -19,7 +18,6 @@ const links = [
 
 function Sidebar() {
   const router = useLocation()
-  // const navigate = useNavigate()
   return (
     <>
     <aside className="relative animate__animated animate__fadeInLeft poppins left-0 z-[10] sidebars shadow-2xl " style={{width: '200px'}}>

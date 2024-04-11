@@ -15,16 +15,20 @@ type Store = {
   setAppAlert: (data: AppAlert | null) => void;
   onboardingChoices: OnboardChoice[] | null;
   setOnboardChoice: (data: OnboardChoice) => void;
+  
   storeVideo: (data: StoredVideo) => void;
-  updateVideo: (videoId: string, update: any) => void;
+  updateVideoControls: (videoId: string, controls: {playing: boolean}) => void;
   storedVideos: StoredVideo[] | null;
+  setControlledPlaybackTime: (videoId: string, playbackTime: number) => void;
+  
   ongoingAnalysis: OngoingAnalysis | null;
   setOngoingAnalysis: (data: OngoingAnalysis) => void;
+
   updateAnalysisSingleSnapshot: ({snapshotId, videoId}, snapshot: Snapshot) => void;
   setAnalysisSnapshots: (snapshots: Snapshot[]) => void;
   updateSnapshots: (snapshot: Snapshot) => void;
-  setSelectedSnapshot: (snapshot: Snapshot) => void;
-  selectedSnapshot: snapshot | null;
+  setSelectedSnapshot: (selected: {snapshot: Snapshot, videoId: string} | null) => void;
+  selectedSnapshot: {snapshot: Snapshot; videoId: string} | null
 };
 
 const useStore = create<Store>((set, get) => ({
@@ -33,8 +37,8 @@ const useStore = create<Store>((set, get) => ({
   storedVideos: null,
   ongoingAnalysis: null,
   selectedSnapshot: null,
-  setSelectedSnapshot(snapshot) {
-    set({selectedSnapshot: snapshot})
+  setSelectedSnapshot(selected) {
+    set({selectedSnapshot: selected})
   },
   updateAnalysisSingleSnapshot({snapshotId, videoId}, snapshot) {
     const item = get().ongoingAnalysis
@@ -73,13 +77,22 @@ const useStore = create<Store>((set, get) => ({
       set({storedVideos: [...videos, data]})
     }
   },
-  updateVideo(videoId, update) {
+  setControlledPlaybackTime(videoId, playbackTime) {
     const videos = get().storedVideos
     if (!videos) return
     const idx = videos.findIndex(i => i.id === videoId)
-    videos[idx] = {...videos[idx], ...update}
+    videos[idx].lastControlledPlaybackTime = playbackTime
     set({
-      storedVideos: videos
+      storedVideos: [...videos]
+    })
+  },
+  updateVideoControls(videoId, controls) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    videos[idx].controls = {...videos[idx].controls, ...controls}
+    set({
+      storedVideos: [...videos]
     })
   },
   setOnboardChoice(data) {

@@ -47,6 +47,7 @@ type StoredVideo = {
   name: string;
   type: string;
   size: number;
+  lastControlledPlaybackTime?: number;
   controls: {
     playing: boolean
   },

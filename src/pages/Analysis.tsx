@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, fragment } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useStore } from "../store"
 import {  StoredVideo, Snapshot } from "../types";
 import { TbLayoutList } from "react-icons/tb";
@@ -33,7 +33,7 @@ function SelectedOngoingAnalysis() {
             
 
             return (
-              <div  key={item.id} onClick={() => setSelectedSnapshot(item)} className={`w-[100px] cursor-pointer relative h-[80px] animate__animated animate__slideInLeft ${selectedSnapshot && selectedSnapshot.id === item.id ? "active" : ""} `}>
+              <div  key={item.id} onClick={() => setSelectedSnapshot({snapshot: item, videoId: ongoingAnalysis.videoId})} className={`w-[100px] cursor-pointer relative h-[80px] animate__animated animate__slideInLeft ${selectedSnapshot && selectedSnapshot.snapshot && selectedSnapshot.snapshot.id === item.id ? "active" : ""} `}>
                 <img key={item.id} src={item.path} className="w-full h-full " />
                 { negDiff > posDiff ?
                   <GoAlertFill className="absolute red top-[30px] left-[40px]" />
@@ -62,7 +62,9 @@ function AnalysisPopup() {
   )
 }
 
-function SnapshotDetail({ closeModal, snapshot, }) {
+function SnapshotDetail({ closeModal, snapshot, videoId}: {closeModal: () => void, snapshot: Snapshot, videoId: string}) {
+  const setControlledPlaybackTime = useStore(state => state.setControlledPlaybackTime)
+
   return (
     <div className="fixed modal_overlay ">
       <div className="modal px-4 py-4 animate__animated animate__zoomIn rounded-sm">
@@ -80,8 +82,8 @@ function SnapshotDetail({ closeModal, snapshot, }) {
               <MdOutlineSlowMotionVideo 
                 className="cursor-pointer" 
                 onClick={() => {
-                  seekPlayback(snapshot.playbackTime)} 
-                }
+                  setControlledPlaybackTime(videoId, snapshot.playbackTime)
+                }}
               />
             </div>
           </div>
@@ -113,7 +115,7 @@ function UploadedVideo(
   const setAppAlert = useStore(state => state.setAppAlert)
   const setAnalysisSnapshots = useStore(state => state.setAnalysisSnapshots)
   const updateSnapshots = useStore(state => state.updateSnapshots)
-  const updateVideo = useStore(state => state.updateVideo)
+  const updateVideoControls = useStore(state => state.updateVideoControls)
   const intervalRef = useRef(null)
   const nextTick = useRef(0)
   const snapshotRef = useRef([])
@@ -177,6 +179,7 @@ function UploadedVideo(
       setAppAlert({type: "warn", message: "Please download previous analysis result to begin a new one."})
       return 
     }
+    videoRef.current.pause()
     setOngoingAnalysis({videoId: video.id, timeStarted: new Date()})
     intervalRef.current = setInterval(() => {
       videoRef.current.currentTime = nextTick.current
@@ -198,6 +201,14 @@ function UploadedVideo(
     
   }
 
+  function handeControls(controls: {playing: boolean}) {
+    if (ongoingAnalysis && ongoingAnalysis.videoId === video.id && !ongoingAnalysis.timeEnded) {
+      setAppAlert({type: "warn", message: "Current analysis is still in progress"})
+      return 
+    }
+    updateVideoControls(video.id, controls)
+  }
+
   useEffect(() => {
     return () => clearInterval(intervalRef.current)
   }, [])
@@ -206,6 +217,12 @@ function UploadedVideo(
     if (video.controls.playing) videoRef.current.play()
     else videoRef.current.pause()
   }, [video.controls.playing])
+
+  useEffect(() => {
+    if (typeof video.lastControlledPlaybackTime === "number") {
+      videoRef.current.currentTime = video.lastControlledPlaybackTime
+    }
+  }, [video.lastControlledPlaybackTime])
 
   return (
     <div className={`cam_res ${isClicked ? "active" : ""} rounded-md relative poppins mb-[20px]`} onClick={() => {
@@ -230,8 +247,8 @@ function UploadedVideo(
         <button className="control_btn">
           {
             video.controls.playing ? 
-            <MdOutlinePauseCircleOutline onClick={() => updateVideo(video.id, {controls: {playing: false}})} />
-            : <FaRegCirclePlay onClick={() => updateVideo(video.id, {controls: {playing: true}})} />
+            <MdOutlinePauseCircleOutline onClick={() => handeControls({playing: false})} />
+            : <FaRegCirclePlay onClick={() => handeControls({playing: true})} />
           }
         </button>
           
@@ -249,7 +266,7 @@ function UploadedVideo(
   )
 }
 
-function Surveillance() {
+function Analysis() {
   const cameraList = useStore(state => state.cameraList)
   const [layout, setLayout] = useState<"column" | "row">("row")
   const selectedCamera = useStore(state => state.selectedCamera)
@@ -307,7 +324,7 @@ function Surveillance() {
     <>
     <div className="px-[40px] py-[30px] animate__animated animate__fadeIn flex-1 justify-between mx-[auto] poppins text-[white] ">
       <div className="">
-        {/* <DashHeader text={"surveillance"} /> */}
+        {/* <DashHeader text={"Analysis"} /> */}
         <div className="flex justify-between mb-[30px]">
           <div className="flex gap-x-[10px]">
             <Searchbar />
@@ -355,7 +372,7 @@ function Surveillance() {
           {
             !cameraList && !storedVideos ?
             <div className="subtext rounded-md flex justify-center mt-[50px] bg-[#161a1e] w-[400px] flex flex-col text-center items-center mx-[auto] py-5 px-4">
-              <h2>No camera? Upload a video and watch surveillance shield in action.</h2>
+              <h2>Upload a video and watch Frame Fushion in action.</h2>
 
               <div className="flex items-center gap-x-[20px]">
                 <label className="app_button mt-5" htmlFor="vidUpload">Upload video</label>
@@ -384,7 +401,8 @@ function Surveillance() {
       selectedSnapshot ? 
       <SnapshotDetail 
         closeModal={() => setSelectedSnapshot(null)} 
-        snapshot={selectedSnapshot} 
+        snapshot={selectedSnapshot.snapshot}
+        videoId={selectedSnapshot.videoId} 
       /> 
       : <></> 
     }
@@ -392,4 +410,4 @@ function Surveillance() {
   )
 }
 
-export default Surveillance
+export default Analysis

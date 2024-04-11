@@ -96,6 +96,18 @@ export async function onRequestPost<Env>(context: any) {
       }
     })
     const textClassificationRes = await textClassification.json()
+    const filtered = textClassificationRes.result.filter(i => {
+      const positiveScore = textClassificationRes.result.find(i => i.label === "POSITIVE").score
+      const negativeScore = textClassificationRes.result.find(i => i.label === "NEGATIVE").score
+
+      const posDiff = positiveScore - negativeScore
+      const negDiff = negativeScore - positiveScore
+
+      if (negDiff > posDiff) return i
+    })
+    console.log(textClassificationRes)
+    console.log(filtered)
+    
     return new Response(JSON.stringify({
       success: true,
       data: {

@@ -7,14 +7,16 @@ import Dashboard from './pages/Dashboard.tsx'
 import Login from './pages/Login.tsx'
 import Signup from './pages/Signup.tsx'
 import Landing from './pages/Landing.tsx'
-import Surveillance from './pages/Surveillance.tsx'
+import Analysis from './pages/Analysis.tsx'
 import ActivityLogs from './pages/ActivityLogs.tsx'
 import Onboard from './pages/Onboard.tsx'
+import Notfound from './pages/Notfound.tsx'
 
-const route = createBrowserRouter([
+const routes = createBrowserRouter([
   {
     path: "/",
-    element: <Landing />
+    element: <Landing />,
+    errorElement: <Notfound />
   },
   {
     path: "/onboard",
@@ -25,8 +27,8 @@ const route = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/simulation/app/surveillance",
-        element: <Surveillance />
+        path: "/simulation/app/Analysis",
+        element: <Analysis />
       },
       {
         path: "/simulation/app/logs",
@@ -41,10 +43,10 @@ const route = createBrowserRouter([
   {
     path: "/register",
     element: <Signup />
-  }
+  },
 ])
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={route} />
+    <RouterProvider router={routes} />
   </React.StrictMode>,
 )
