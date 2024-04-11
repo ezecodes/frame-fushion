@@ -16,12 +16,15 @@ type Store = {
   onboardingChoices: OnboardChoice[] | null;
   setOnboardChoice: (data: OnboardChoice) => void;
   storeVideo: (data: StoredVideo) => void;
+  updateVideo: (videoId: string, update: any) => void;
   storedVideos: StoredVideo[] | null;
   ongoingAnalysis: OngoingAnalysis | null;
   setOngoingAnalysis: (data: OngoingAnalysis) => void;
   updateAnalysisSingleSnapshot: ({snapshotId, videoId}, snapshot: Snapshot) => void;
   setAnalysisSnapshots: (snapshots: Snapshot[]) => void;
   updateSnapshots: (snapshot: Snapshot) => void;
+  setSelectedSnapshot: (snapshot: Snapshot) => void;
+  selectedSnapshot: snapshot | null;
 };
 
 const useStore = create<Store>((set, get) => ({
@@ -29,6 +32,10 @@ const useStore = create<Store>((set, get) => ({
   onboardingChoices: null,
   storedVideos: null,
   ongoingAnalysis: null,
+  selectedSnapshot: null,
+  setSelectedSnapshot(snapshot) {
+    set({selectedSnapshot: snapshot})
+  },
   updateAnalysisSingleSnapshot({snapshotId, videoId}, snapshot) {
     const item = get().ongoingAnalysis
     if (!item || item.videoId !== videoId) return
@@ -52,8 +59,6 @@ const useStore = create<Store>((set, get) => ({
     set({
       ongoingAnalysis: item
     })
-    console.log(get().ongoingAnalysis)
-
   },
   setOngoingAnalysis(data) {
     set({
@@ -67,6 +72,15 @@ const useStore = create<Store>((set, get) => ({
     } else {
       set({storedVideos: [...videos, data]})
     }
+  },
+  updateVideo(videoId, update) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    videos[idx] = {...videos[idx], ...update}
+    set({
+      storedVideos: videos
+    })
   },
   setOnboardChoice(data) {
     const find = get().onboardingChoices
