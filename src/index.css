@@ -58,7 +58,6 @@ li {
   width: 100%;
 }
 .Toastify__toast-body {
-  font-family: poppins !important;
   font-size: .95rem !important;
 }
 .onb_ input[type="radio"] + label:before {
@@ -219,7 +218,7 @@ h1 {
 .cam_res {
   border-radius: 5px;
 }
-.cam_res.active {
+.active {
   outline: 2px solid #646cff;
 }
 .cam_res > div:first-child {

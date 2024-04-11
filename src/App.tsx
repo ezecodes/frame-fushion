@@ -32,7 +32,7 @@ function App() {
   return (
     <>
     <section className='min-h-[100vh] bg-raisinBlack animate__animated animate__fadeIn flex flex-col'>
-      <AppHeader />
+      {/*<AppHeader />*/}
       <section className=" flex-1 flex">
         <Sidebar />
         <Outlet />
