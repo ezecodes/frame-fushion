@@ -47,12 +47,15 @@ type StoredVideo = {
   name: string;
   type: string;
   size: number;
+  controls: {
+    playing: boolean
+  },
   duration: number;
 }
 
 type OngoingAnalysis = {
   videoId: string;
-  timeStarted: Date
+  timeStarted: Date;
   timeEnded?: Date;
   snapshots?: Snapshot[]
 }
