@@ -1,5 +1,5 @@
 {
-  "name": "surveil-ai",
+  "name": "frame-fushion",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,11 +8,17 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "deploy": "npm run build && wrangler pages deploy ./dist",
-    "preview": "npm run build && wrangler pages dev ./dist"
+    "preview": "npm run build && wrangler pages dev ./dist",
+    "server:dev": "node --throw-deprecation --watch-preserve-output --watch-path=./bin ./bin/www --abort-on-uncaught-exception",
+    "server:production": "node bin/www"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.12",
+    "cookie-parser": "^1.4.6",
     "date-fns": "^3.6.0",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
@@ -22,6 +28,8 @@
     "react-router-dom": "^6.22.3",
     "react-toastify": "^10.0.5",
     "reactjs-popup": "^2.0.6",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "uuid": "^9.0.1",
     "zustand": "^4.5.2"
   },
