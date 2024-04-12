@@ -13,6 +13,13 @@ import { GoAlertFill } from "react-icons/go";
 import { MdOutlineSlowMotionVideo } from "react-icons/md";
 import { FaRegCirclePlay } from "react-icons/fa6";
 import { MdOutlinePauseCircleOutline } from "react-icons/md";
+import { io } from "socket.io-client";
+const socket = io(
+  process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://socs.onrenderer.com",
+  {
+    autoConnect: false
+  }
+)
 
 function SelectedOngoingAnalysis() {
   const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
@@ -108,7 +115,7 @@ function UploadedVideo(
     click: (id: string) => void,
   }
 ) {
-  const videoRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const videoSrcRef = useRef(null)
   const setOngoingAnalysis = useStore(state => state.setOngoingAnalysis)
   const ongoingAnalysis = useStore(state => state.ongoingAnalysis)
@@ -119,8 +126,10 @@ function UploadedVideo(
   const intervalRef = useRef(null)
   const nextTick = useRef(0)
   const snapshotRef = useRef([])
+  const totalFrames = useRef(25)
+  const stepsCount = useRef(0)
   
-  function getDataUrl(tick: number) : string {
+  function getDataUrl() : string {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const { videoWidth, videoHeight } = videoRef.current;
@@ -169,6 +178,9 @@ function UploadedVideo(
       }
     }
   }
+  function sendSnapshots() {
+    
+  }
 
   function analyseVideo() {
     if (ongoingAnalysis && !ongoingAnalysis.timeEnded) {
@@ -180,11 +192,12 @@ function UploadedVideo(
       return 
     }
     videoRef.current.pause()
+    stepsCount.current = Math.floor(videoRef.current.duration / totalFrames.current)
     setOngoingAnalysis({videoId: video.id, timeStarted: new Date()})
     intervalRef.current = setInterval(() => {
       videoRef.current.currentTime = nextTick.current
       const snapshot = {
-        path: getDataUrl(nextTick.current),
+        path: getDataUrl(),
         id: uuid(),
         playbackTime: videoRef.current.currentTime,
         timeCaptured: new Date(),
@@ -192,14 +205,16 @@ function UploadedVideo(
       snapshotRef.current.push(snapshot)
       if (nextTick.current > videoRef.current.duration) {
         clearInterval(intervalRef.current)
-        analyseSnapshots()
+        // analyseSnapshots()
+        sendSnapshots()
         return
       }
-      nextTick.current += 20
+      nextTick.current += stepsCount.current
       
     }, 200)
     
   }
+
 
   function handeControls(controls: {playing: boolean}) {
     if (ongoingAnalysis && ongoingAnalysis.videoId === video.id && !ongoingAnalysis.timeEnded) {
@@ -208,10 +223,6 @@ function UploadedVideo(
     }
     updateVideoControls(video.id, controls)
   }
-
-  useEffect(() => {
-    return () => clearInterval(intervalRef.current)
-  }, [])
 
   useEffect(() => {
     if (video.controls.playing) videoRef.current.play()
@@ -281,10 +292,32 @@ function Analysis() {
   // const workerRef = useRef(null)
   const selectedSnapshot = useStore(state => state.selectedSnapshot)
   const setSelectedSnapshot = useStore(state => state.setSelectedSnapshot)
+  const socketState = useRef({connected: false})
 
+  function onSocketConnect() {
+    socketState.current.connected = true
+    console.log("hello")
+  }
+  function onSocketDisconnect() {
+    socketState.current.connected = false
+
+  }
+  function analysisEvent() {
+
+  }
   useEffect(() => {
-    // const worker = new Worker("../worker.js");
-    // workerRef.current = worker
+    socket.connect()
+    socket.on("connect", onSocketConnect)
+    socket.on("disconnect", onSocketDisconnect)
+    socket.on("analysis", analysisEvent)
+    
+    socket.emit("analysis", "hi")
+
+    return () => {
+      socket.off('connect', onSocketConnect);
+      socket.off('disconnect', onSocketDisconnect);
+      socket.off('analysis', analysisEvent);
+    }
   }, [])
 
   function isDuplicate(name: string) : boolean {
