@@ -64,8 +64,8 @@ function Onboard() {
   }
 
   function openApp() {
-    toast.info("You will now be redirected to the simulation environment", {
-      onClose: () => navigate("/simulation/app")
+    toast.info("You will now be redirected to the app", {
+      onClose: () => navigate("/app")
     })
   }
 
