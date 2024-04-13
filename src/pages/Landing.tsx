@@ -9,11 +9,11 @@ function Landing() {
       <div className="auto_w ">
         <LandingHeader />
         <div className="mt-[60px] w-[100%] md:w-[600px] mx-[auto] text-center animate__animated animate__fadeInUp animate__delay-1s">
-          <h1 className="text-[2.5rem] font-[400] mb-[20px]">Empowering Security <br />with <span className="text-[#ffca4c]">AI Insights</span></h1>
-          <p className="text-[.9rem] text-[#d3d3d3] font-[300]">Experience peace of mind with our AI-powered surveillance.<br /> Detect and respond to threats quickly and effectively. </p>
-          <Link to="/onboard" className="font-[300] px-4 py-2 block w-[150px] mx-[auto] mt-5 text-[.95rem] rounded-md bg-prussianBlue">Get started
+          <h1 className="text-[2.5rem] font-[400] mb-[20px]"><span className="text-[#ffca4c]">Synthesizes information</span><br /> from video frames </h1>
+          <p className="subtext">It's your tool for advanced video analysis, <br /> offering a deeper understanding of your content's visual data </p>
+          <Link to="/signin" className="font-[300] px-4 py-2 block w-[150px] mx-[auto] mt-5 text-[.95rem] rounded-md bg-prussianBlue">Get started
           </Link>
-          <span className="text-[#d3d3d3] text-[.7rem]">No Sign up required </span>
+          {/* <span className="text-[#d3d3d3] text-[.7rem]">No Sign up required </span> */}
           
         </div>
         <div title="Powered by cloudflare" className="animate__fadeInUp animate__animated animate__delay-2s my-[90px] flex gap-x-[70px] mx-[auto] py-[30px] px-5 bg-[#242b33] shadow-2xl rounded-md relative">

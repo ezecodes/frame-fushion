@@ -1,20 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import Analysis from './pages/Analysis.tsx'
 import './index.css'
 import {RouterProvider, createBrowserRouter} from "react-router-dom"
-import Dashboard from './pages/Dashboard.tsx'
-import Login from './pages/Login.tsx'
-import Signup from './pages/Signup.tsx'
+import Signin from './pages/Signin.tsx'
 import Landing from './pages/Landing.tsx'
-import Surveillance from './pages/Surveillance.tsx'
-import ActivityLogs from './pages/ActivityLogs.tsx'
 import Onboard from './pages/Onboard.tsx'
+import Notfound from './pages/Notfound.tsx'
 
-const route = createBrowserRouter([
+const routes = createBrowserRouter([
   {
     path: "/",
-    element: <Landing />
+    element: <Landing />,
+    errorElement: <Notfound />
   },
   {
     path: "/onboard",
@@ -22,33 +20,15 @@ const route = createBrowserRouter([
   },
   {
     path: "/app",
-    element: <App />,
-    children: [
-      {
-        path: "/app",
-        element: <Dashboard />
-      },
-      {
-        path: "/app/surveillance",
-        element: <Surveillance />
-      },
-      {
-        path: "/app/logs",
-        element: <ActivityLogs />
-      }
-    ]
+    element: <Analysis />,
   },
   {
-    path: "/login",
-    element: <Login />
+    path: "/signin",
+    element: <Signin />
   },
-  {
-    path: "/register",
-    element: <Signup />
-  }
 ])
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={route} />
+    <RouterProvider router={routes} />
   </React.StrictMode>,
 )

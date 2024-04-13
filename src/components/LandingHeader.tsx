@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom"
+import PsuedoLogo from "./PsuedoLogo"
 function LandingHeader() {
 	return (
 		<header className="py-5 flex px-5 justify-between" style={{borderBottom: "1px solid #242a31"}} >
-	      <Link to="/"><span className="font-[400] text-[white] text-[1.5rem]">GG</span></Link>
+	      <PsuedoLogo path="/" />
 	      <NavManager />
 	      
     </header>
