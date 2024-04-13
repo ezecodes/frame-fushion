@@ -1,14 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import Analysis from './pages/Analysis.tsx'
 import './index.css'
 import {RouterProvider, createBrowserRouter} from "react-router-dom"
-import Dashboard from './pages/Dashboard.tsx'
-import Login from './pages/Login.tsx'
-import Signup from './pages/Signup.tsx'
+import Signin from './pages/Signin.tsx'
 import Landing from './pages/Landing.tsx'
-import Analysis from './pages/Analysis.tsx'
-import ActivityLogs from './pages/ActivityLogs.tsx'
 import Onboard from './pages/Onboard.tsx'
 import Notfound from './pages/Notfound.tsx'
 
@@ -23,26 +19,12 @@ const routes = createBrowserRouter([
     element: <Onboard />
   },
   {
-    path: "/simulation/app",
-    element: <App />,
-    children: [
-      {
-        path: "/simulation/app/Analysis",
-        element: <Analysis />
-      },
-      {
-        path: "/simulation/app/logs",
-        element: <ActivityLogs />
-      },
-    ]
+    path: "/app",
+    element: <Analysis />,
   },
   {
-    path: "/login",
-    element: <Login />
-  },
-  {
-    path: "/register",
-    element: <Signup />
+    path: "/signin",
+    element: <Signin />
   },
 ])
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -22,7 +22,7 @@
 
   --wrapper_width: 100%;
 
-  --sidebars_width: 250px;
+  --sidebars_width: 300px;
 
   --prussianBlue: #1D3753;
   --outerSpace: #4A525A;
@@ -44,10 +44,12 @@
  
 .sidebars {
   width: var(--sidebars_width);
-  min-height: 100vh;
-  z-index: 10;
-  background-color: #252c35;
-  /* padding-top: 90px; */
+    height: 70vh;
+    z-index: 10;
+    background-color: #252c35;
+    /* padding-top: 90px; */
+    position: relative;
+    top: 30vh;
 }
 li {
   list-style: none;

@@ -1,74 +1,75 @@
 import {create} from "zustand"
-import { Alert, Camera, DetectedImage, AppAlert, ActivityLog, OnboardChoice, StoredVideo, OngoingAnalysis, Snapshot } from "./types";
+import { Alert, AppAlert, ActivityLog, OnboardChoice, StoredVideo } from "./types";
 
 type Store = {
   alerts: Alert[] | null;
-  activityLogs: ActivityLog[] | null;
-  cameraList: Camera[] | null;
   setAlert: (alert: Alert) => void;
-  setSelectedCamera: (camera: Camera) => void;
-  selectedCamera: Camera | null;
-  detectedImages: DetectedImage[] | null;
-  setDetectedImage: (detectedImage: DetectedImage) => void;
-  setCameraControl: (data: {cameraId: string; control: {audio: boolean} | {recording: boolean}}) => void;
+
+  activityLogs: ActivityLog[] | null;
+
   appAlert: AppAlert | null;
   setAppAlert: (data: AppAlert | null) => void;
+
   onboardingChoices: OnboardChoice[] | null;
   setOnboardChoice: (data: OnboardChoice) => void;
   
   storeVideo: (data: StoredVideo) => void;
-  updateVideoControls: (videoId: string, controls: {playing: boolean}) => void;
   storedVideos: StoredVideo[] | null;
-  setControlledPlaybackTime: (videoId: string, playbackTime: number) => void;
-  
-  ongoingAnalysis: OngoingAnalysis | null;
-  setOngoingAnalysis: (data: OngoingAnalysis) => void;
 
-  updateAnalysisSingleSnapshot: ({snapshotId, videoId}, snapshot: Snapshot) => void;
-  setAnalysisSnapshots: (snapshots: Snapshot[]) => void;
-  updateSnapshots: (snapshot: Snapshot) => void;
-  setSelectedSnapshot: (selected: {snapshot: Snapshot, videoId: string} | null) => void;
-  selectedSnapshot: {snapshot: Snapshot; videoId: string} | null
+  selectedVideo: StoredVideo | null;
+  setSelectedVideo: (video: StoredVideo) => void;
+
+  updateVideoProperty: (videoId: string, property: any) => void;
+  updateChatResponse: (videoId: string, chatId: string, response: string) => void;
+  appendChat: (videoId: string, chatId: string, prompt: string) => void;
+
+  apiBase: "http://localhost:3000" | "https://socs.onrenderer.com";
+
+  shouldSignIn: boolean;
+  setAuthState: (state: boolean) => void;
+
+  fetchFunction: (api: string, body: any, type: "post" | "get" | "put" | "delete", withAuth: boolean) => Promise<{
+    success: boolean;
+    message: string;
+    data?: any
+  }>;
 };
 
 const useStore = create<Store>((set, get) => ({
   appAlert: null,
   onboardingChoices: null,
   storedVideos: null,
-  ongoingAnalysis: null,
-  selectedSnapshot: null,
-  setSelectedSnapshot(selected) {
-    set({selectedSnapshot: selected})
-  },
-  updateAnalysisSingleSnapshot({snapshotId, videoId}, snapshot) {
-    const item = get().ongoingAnalysis
-    if (!item || item.videoId !== videoId) return
-    const findIdx = item.snapshots.findIndex(i => i.id === snapshotId)
-    item.snapshots[findIdx] = {...snapshot}
-    set({ongoingAnalysis: item})
-  },
-  updateSnapshots(snapshot) {
-    const snapshots = get().ongoingAnalysis?.snapshots || []
-    set({
-      ongoingAnalysis: {
-        ...get()?.ongoingAnalysis,
-        snapshots: [...snapshots, snapshot]
+  selectedVideo: null,
+ 
+  shouldSignIn: false,
+
+  apiBase: process.env.NODE_ENV === "development" ? "http://localhost:3000" :  "https://socs.onrenderer.com",
+  async fetchFunction(api, body, type, withAuth) {
+    let authToken = localStorage.getItem('authToken') || ""
+    
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: withAuth ? `Bearer ${authToken}` : "",
+    }
+    const f = await fetch(get().apiBase + api, {
+      body: body ? JSON.stringify(body) : null,
+      headers,
+      method: type
+    })
+    const jSon = await f.json()
+    if (f.status === 401) {
+      set({appAlert: {message: jSon.message, type: "error"}})
+      set({shouldSignIn: true})
+    } else {
+      set({shouldSignIn: false})
+      
+      if (f.status !== 200 && f.status !== 201) {
+        set({appAlert: {message: jSon.message, type: "error"}})
       }
-    })
+    }
+    return jSon
   },
-  setAnalysisSnapshots(snapshots) {
-    const item = get().ongoingAnalysis
-    if (!item) return
-    item.snapshots = snapshots
-    set({
-      ongoingAnalysis: item
-    })
-  },
-  setOngoingAnalysis(data) {
-    set({
-      ongoingAnalysis: data
-    })
-  },
+  setAuthState(state) {set({shouldSignIn: state})},
   storeVideo(data) {
     let videos = get().storedVideos
     if (!videos) {
@@ -76,6 +77,57 @@ const useStore = create<Store>((set, get) => ({
     } else {
       set({storedVideos: [...videos, data]})
     }
+  },
+  updateVideoProperty(videoId, property) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    videos[idx] = {
+      ...videos[idx],
+      ...property
+    }
+    set({
+      storedVideos: [...videos]
+    })
+  },
+  appendChat(videoId, chatId, prompt) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    const chats = videos[idx].chats
+    const newChat = {id: chatId, prompt, timeStamp: new Date()}
+    if (!chats) videos[idx].chats = [newChat]
+    else {
+      videos[idx].chats.push({...newChat})
+    }
+    set({
+      storedVideos: [...videos]
+    })
+  },
+  updateChatResponse(videoId, chatId, response) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    const chatIdx = videos[idx].chats.findIndex(i => i.id === chatId)
+    videos[idx].chats[chatIdx] = {
+      ...videos[idx].chats[chatIdx],
+      response
+    }
+    set({
+      storedVideos: [...videos]
+    })
+  },
+  setSelectedVideo(video) {
+    set({selectedVideo: video})
+  },
+  setVideoSummary(summary, videoId) {
+    const videos = get().storedVideos
+    if (!videos) return
+    const idx = videos.findIndex(i => i.id === videoId)
+    videos[idx].summary = summary
+    set({
+      storedVideos: [...videos]
+    })
   },
   setControlledPlaybackTime(videoId, playbackTime) {
     const videos = get().storedVideos
@@ -117,38 +169,12 @@ const useStore = create<Store>((set, get) => ({
   },
   alerts: null,
   activityLogs: null,
-  cameraList: null,
-  selectedCamera: null,
-  setSelectedCamera(camera) {
-    set({selectedCamera: camera})
-  },
   setAlert(alert) {
     const alerts = get().alerts
     alerts?.push(alert)
     set({alerts})
   },
-  detectedImages: null,
-  setDetectedImage(detectedImage) {
-    const all = get().detectedImages
-    if (!all) {
-      set({detectedImages: [detectedImage]})
-      return
-    }
-    const findDetected = all.findIndex(i => i.cameraId == detectedImage.cameraId)
-    if (findDetected !== -1) {
-      all[findDetected] = detectedImage
-    } else {
-      all.push(detectedImage)
-    }
-    set({detectedImages: all})
-  },
-  setCameraControl({cameraId, control}) {
-    const all = get().cameraList
-    if (!all) return
-    const findCamera = all.findIndex(i => i.id === cameraId)
-    all[findCamera].control = {...all[findCamera].control, ...control}
-    set({cameraList: all})
-  },
+  
 }))
 
 export {

@@ -6,12 +6,12 @@ import PsuedoLogo from "./PsuedoLogo";
 const links = [
   {
     name: "Analysis",
-    href: "/simulation/app/analysis",
+    href: "/app/analysis",
     icon: <IoMdEye className="text-[1.2rem]" />
   },
   {
     name: "Logs",
-    href: "/simulation/app/logs",
+    href: "/app/logs",
     icon: <MdOutlineDataExploration className="text-[1.2rem]" />
   }
 ]
@@ -36,7 +36,7 @@ function Sidebar() {
       </div>
     </aside>
      {/* <div className="fixed bottom-[0] left-0 w-[200px] z-[10]">
-     <button onClick={() => navigate("/simulation/app/customize")} className="sidebar_btn mb-2">
+     <button onClick={() => navigate("/app/customize")} className="sidebar_btn mb-2">
        <IoSettingsOutline /> Customize
      </button>
      <button onClick={() => navigate("/")} className="sidebar_btn">

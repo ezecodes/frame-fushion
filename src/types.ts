@@ -16,21 +16,11 @@ type OnboardChoice = {
   option: string;
 }
 
-type SnapshotDescriptionClassification = {
-  label: string; 
-  score: number
-}
 
 type Snapshot = {
   path: string;
-  id: string;
   timeCaptured: Date;
   playbackTime: number;
-  description?: {
-    text: string;
-    classified: SnapshotDescriptionClassification[],
-    summary: string
-  };
 }
 
 type ActivityLog = {
@@ -41,6 +31,13 @@ type ActivityLog = {
   lastTimeCaptured: string | Date
 }
 
+type Chat = {
+  prompt: string;
+  id: string;
+  timeStamp: Date;
+  response?: string;
+}
+
 type StoredVideo = {
   id: string;
   path: string;
@@ -48,58 +45,20 @@ type StoredVideo = {
   type: string;
   size: number;
   lastControlledPlaybackTime?: number;
+  analysing: boolean;
+  summary?: string;
+  chats?: Chat[],
   controls: {
     playing: boolean
   },
   duration: number;
 }
 
-type OngoingAnalysis = {
-  videoId: string;
-  timeStarted: Date;
-  timeEnded?: Date;
-  snapshots?: Snapshot[]
-}
-
-type Camera = {
-  id: string;
-  name: string;
-  location: string;
-  resolution: string;
-  videoFeed: string;
-  snapshots: Snapshot[];
-  control: {
-    recording: boolean,
-    audio: boolean
-  }
-}
-
-type DetectedImageResponse = {
-  score: number;
-  label: string;
-  box: {
-    xmin: number;
-    ymin: number;
-    xmax: number;
-    ymax: number;
-  }
-}
-
-type DetectedImageResponseArray = DetectedImageResponse[]
-
-type DetectedImage = {
-  cameraId: string;
-  response: DetectedImageResponseArray
-}
 export type {
   Alert,
-  Camera,
-  DetectedImageResponseArray,
-  DetectedImage,
   AppAlert,
   Snapshot,
   ActivityLog,
   StoredVideo,
-  OngoingAnalysis,
   OnboardChoice
 }
