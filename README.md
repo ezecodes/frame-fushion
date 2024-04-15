@@ -23,18 +23,25 @@ A a web application built with React and cloudflare serverless functions that pr
 3. **Wrangler.toml**
    Append the following bindings to your `wrangler.toml` file
 # wrangler.toml
-` name =  
-pages_build_output_dir =  
-compatibility_date =  
-compatibility_flags = ["nodejs_compat"]
+`name =`
 
-[ai]
-binding = "AI"
+`pages_build_output_dir =`
 
-[[d1_databases]]
-binding = // available in your Worker on env.DB
-database_name =  
-database_id = `
+`compatibility_date =`
+
+`compatibility_flags = ["nodejs_compat"]`
+
+`[ai]`
+
+`binding = "AI"`
+
+`[[d1_databases]]`
+
+`binding = // available in your Worker on env.DB`
+
+`database_name =`
+
+`database_id =`
 
 5. **Start the Development Server**
    Run `npm run dev` to start the Vite server
