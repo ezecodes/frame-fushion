@@ -1,7 +1,7 @@
 # Frame fushion
 
 ## Description
-A a web application built with React and cloudflare serverless functions that provides advanced video analysis capabilities. 
+Utilizing Cloudflare Workers and Pages with TypeScript to build frame-fushion
 
 ## Features
 - **Video Upload:** Users can upload videos from their local machine for analysis.
