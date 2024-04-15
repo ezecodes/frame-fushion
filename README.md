@@ -26,7 +26,7 @@ Utilizing Cloudflare Workers and Pages with TypeScript to build frame-fushion
    Run `npm run dev` to start the Vite server
    Run `npm run preview` to start wrangler
    
-## wrangler.toml
+### wrangler.toml
 `name =`
 
 `pages_build_output_dir =`
