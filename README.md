@@ -22,7 +22,11 @@ A a web application built with React and cloudflare serverless functions that pr
    `npm install`
 3. **Wrangler.toml**
    Append the following bindings to your `wrangler.toml` file
-# wrangler.toml
+4. **Start the Development Server**
+   Run `npm run dev` to start the Vite server
+   Run `npm run preview` to start wrangler
+   
+## wrangler.toml
 `name =`
 
 `pages_build_output_dir =`
@@ -43,7 +47,5 @@ A a web application built with React and cloudflare serverless functions that pr
 
 `database_id =`
 
-5. **Start the Development Server**
-   Run `npm run dev` to start the Vite server
-   Run `npm run preview` to start wrangler 
+
    
