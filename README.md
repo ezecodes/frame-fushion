@@ -16,8 +16,7 @@ Utilizing Cloudflare Workers and Pages with TypeScript to build frame-fushion
    
 ## Getting Started
 1. **Clone the Repository:**
-   `git clone https://github.com/ezecodes/frame-fushion.git`
-   cd frame-fushion
+   `git clone https://github.com/ezecodes/frame-fushion.git` and `cd frame-fushion`
 2. **Install dependencies**
    `npm install`
 3. **Wrangler.toml**
